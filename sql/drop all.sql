@@ -1,0 +1,14 @@
+drop table shopping_carts;
+drop table history;
+drop table users;
+drop table book_params;
+drop table book_attrs;
+drop table books_authors;
+drop table books;
+drop table categories;
+drop table authors;
+drop sequence authors_seq_author_id;
+drop sequence categories_seq_category_id;
+drop sequence books_seq_book_id;
+drop sequence book_attrs_seq_attr_id;
+drop sequence users_seq_user_id;
