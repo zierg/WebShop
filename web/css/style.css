@@ -1,0 +1,50 @@
+@charset "utf-8";
+/* CSS Document */
+
+#wrapper {
+	height: 1000px;
+	width: 896px;
+	margin-right: auto;
+	margin-left: auto;
+}
+#page {
+	background-color: #FCC;
+	height: 100%;
+	width: 820px;
+	position: relative;
+	left: 17px;
+	padding: 20px;
+}
+#header {
+	height: 200px;
+	width: 896px;
+}
+#head-menu {
+	height: 50px;
+	width: auto;
+	background-color: #F90;
+}
+#head-lable {
+	height: 150px;
+	width: auto;
+	background-color: #3C0;
+}
+#right-sidebar {
+	height: 80%;
+	width: 200px;
+	background-color: #0FF;
+	float: left;
+	position: relative;
+	left: 20px;
+}
+#box {
+	height: 100%;
+	width: 600px;
+	background-color: #FFF;
+	float: left;
+}
+#footer {
+	height: 100px;
+	width: 900px;
+	background-color: #903;
+}
