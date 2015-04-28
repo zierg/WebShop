@@ -10,7 +10,6 @@ create table authors
 create table categories
 (
     category_id number CONSTRAINT categories_pk_category_id PRIMARY KEY,
-    parent_id number CONSTRAINT categories_fk_parent_id REFERENCES categories(category_id) ON DELETE CASCADE,
     title varchar2(255),
     description CLOB
 );
@@ -183,12 +182,57 @@ insert into authors(author_id, name, surname, middlename, biography) values (1, 
 на нескольких
 строчках.');
 
-insert into categories(category_id, parent_id, title, description) values(1, null, 'Историческая проза', 'Историческая проза — условное обозначение для разнородных по структуре и композиции романов, повестей, рассказов, в которых повествуется об исторических событиях более или менее отдалённого времени, а действующими лицами (главными или второстепенными) могут выступать исторические личности.');
+insert into authors(author_id, name, surname, middlename, biography) values (2, 'Станислав', 'Лем', '', 'Биография
+Лема
+на нескольких
+строчках.');
+
+insert into authors(author_id, name, surname, middlename, biography) values (3, 'Илья', 'Ильф', 'Арнольдович', 'Биография
+Ильфа
+на нескольких
+строчках.');
+
+insert into authors(author_id, name, surname, middlename, biography) values (4, 'Евгений', 'Петров', 'Петрович', 'Биография
+Петрова
+на нескольких
+строчках.');
+
+insert into authors(author_id, name, surname, middlename, biography) values (5, 'Дуглас', 'Адамс', '', 'Биография
+Адамса
+на нескольких
+строчках.');
+
+insert into authors(author_id, name, surname, middlename, biography) values (6, 'Алан Александр', 'Милн', '', 'Биография
+Милна
+на нескольких
+строчках.');
+
+insert into categories(category_id, title, description) values(1, 'Историческая проза', 'Историческая проза — условное обозначение для разнородных по структуре и композиции романов, повестей, рассказов, в которых повествуется об исторических событиях более или менее отдалённого времени, а действующими лицами (главными или второстепенными) могут выступать исторические личности.');
+insert into categories(category_id, title, description) values(2, 'Поэма', 'Большое эпическое стихотворное произведение, принадлежащее определенному автору, большая стихотворная повествовательная форма. Может быть героической, романтической, критической, сатирической и т. п.');
+insert into categories(category_id, title, description) values(3, 'Научная фантастика', 'Научная фантастика (НФ) — жанр в литературе, кино и других видах искусства, одна из разновидностей фантастики. Научная фантастика основывается на фантастических допущениях (вымысле, спекуляции) в области науки, включая как точные, так и естественные, и гуманитарные науки.');
+insert into categories(category_id, title, description) values(4, 'Роман', 'Роман — литературный жанр, как правило, прозаический, который предполагает развернутое повествование о жизни и развитии личности главного героя (героев) в кризисный, нестандартный период его жизни.');
+insert into categories(category_id, title, description) values(5, 'Сказка', 'Сказка — один из жанров фольклора, либо литературы. Эпическое, преимущественно прозаическое произведение волшебного характера, обычно со счастливым концом. Как правило, сказки рассчитаны на детей.');
 
 insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
     values (1, '«Капитанская дочка» — короткий исторический роман (или повесть) А. С. Пушкина, действие которого происходит во время восстания Емельяна Пугачёва. Впервые опубликован без указания имени автора в 4-й книжке журнала «Современник», поступившей в продажу в последней декаде 1836 года.', 'Капитанская дочка', 'www.captain_daughter.com', 0, to_date('1836', 'YYYY'), 1, 1);
+insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
+    values (2, '«Руслан и Людмила» — первая законченная поэма Александра Сергеевича Пушкина; волшебная сказка, вдохновлённая древнерусскими былинами.', 'Руслан и Людмила', 'www.ruslan_and_ludmila.com', 0, to_date('1820', 'YYYY'), 2, 1);
+insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
+    values (3, '«Непобедимый» (польск. Niezwyciężony) — научно-фантастический роман Станислава Лема 1964 года.', 'Непобедимый', 'www.Niezwyciężony.com', 0, to_date('1964', 'YYYY'), 3, 1);
+insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
+    values (4, '«Двена́дцать сту́льев» — роман И. Ильфа и Е. Петрова. Написан в 1927 году. Жанр — остросатирический роман-фельетон.', 'Двенадцать стульев', 'www.12chairs.com', 0, to_date('1928', 'YYYY'), 4, 1);
+insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
+    values (5, '«Автостопом по галактике» (англ. The Hitchhiker’s Guide to the Galaxy или дословно «Путеводитель по галактике для автостопщиков», «Путеводитель для путешествующих по галактике автостопом», 1979) — юмористический фантастический роман английского писателя Дугласа Адамса. Первая книга одноимённой серии.', 'Автостопом по галактике', 'www.Guide_to_the_Galaxy.com', 0, to_date('1979', 'YYYY'), 3, 1);
+insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
+    values (6, '«Винни-Пух» представляет собой дилогию, но каждая из двух книг Милна распадается на 10 рассказов (stories) с собственным сюжетом.', 'Винни-Пух', 'www.winny.com', 0, to_date('1928', 'YYYY'), 5, 1);
     
 insert into books_authors(book_id, author_id) values (1, 1);
+insert into books_authors(book_id, author_id) values (2, 1);
+insert into books_authors(book_id, author_id) values (3, 2);
+insert into books_authors(book_id, author_id) values (4, 3);
+insert into books_authors(book_id, author_id) values (4, 4);
+insert into books_authors(book_id, author_id) values (5, 5);
+insert into books_authors(book_id, author_id) values (6, 6);
 
 update book_params set value = 'Росмен' where book_id = 1 and attr_id = 1;
 update book_params set value = 'Москва' where book_id = 1 and attr_id = 2;

@@ -18,11 +18,19 @@ public class Book {
     private String description = "";
     private String title = "";
     private String link = "";
-    private float cost;
+    private double cost;
     private Date releaseDate;
     private Category category;
     private boolean isShown;
-    private final List<BookParam> parameters = new ArrayList<>();
+    private List<Author> authors = new ArrayList<>();
+
+    public List<Author> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(List<Author> authors) {
+        this.authors = authors;
+    }
 
     /**
      * @return the book_id
@@ -83,14 +91,14 @@ public class Book {
     /**
      * @return the cost
      */
-    public float getCost() {
+    public double getCost() {
         return cost;
     }
 
     /**
      * @param cost the cost to set
      */
-    public void setCost(float cost) {
+    public void setCost(double cost) {
         this.cost = cost;
     }
 
@@ -134,16 +142,5 @@ public class Book {
      */
     public void setIsShown(boolean isShown) {
         this.isShown = isShown;
-    }
-
-    /**
-     * @return the parameters
-     */
-    public List<BookParam> getParameters() {
-        return parameters;
-    }
-    
-    public void addParameter(BookParam parameter) {
-        parameters.add(parameter);
     }
 }

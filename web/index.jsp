@@ -25,14 +25,17 @@
         <h1>Hello World!</h1>
     </body>
     <%
-        DaoFactory f = new OracleDaoFactory();
+        /*DaoFactory f = new OracleDaoFactory();
         BookParamsDao dao = f.getBookParamsDao();
         for (BookParam a : dao.getParamsByBookId(1)) {
             out.print(a.getBookId() + ": ");
             out.print(a.getAttr().getName() + " = " + a.getValue());
             out.print("<br>");
-        }
+        }*/
+        
     %>
+    <% String ROOT = request.getContextPath();%>
+    <a href="<%= ROOT %>/books">книги</a><br />
     <a href="/youraction" data-paypal-button="true">
   <img src="//www.paypalobjects.com/en_US/i/btn/btn_xpressCheckout.gif" alt="Check out with PayPal" />
 </a>

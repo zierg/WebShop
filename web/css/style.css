@@ -48,3 +48,83 @@
 	width: 900px;
 	background-color: #903;
 }
+
+table.content_table {
+    margin-left: auto; /* Чтобы была по центру */
+    margin-right: auto; /* Чтобы была по центру */
+    background-color:#fafafa;
+    border-collapse: collapse;
+    border: 1px solid #cc0000;
+    width: 800px;
+}
+
+th.book_title {
+    width: 450px;
+    padding: 3px;
+}
+
+th.category {
+    width: 150px;
+    padding: 3px;
+}
+
+th.cost {
+    width: 50px;
+    padding: 3px;
+}
+
+th.action {
+    width: 50px;
+    padding: 3px;
+}
+
+td.book_title {
+    padding: 3px;
+}
+
+td.category {
+    text-align: center;
+    padding: 3px;
+}
+
+td.cost {
+    text-align: center;
+    padding: 3px;
+}
+
+td.action {
+    text-align: center;
+    width: 50px;
+    padding: 3px;
+}
+
+a.main_link {
+    font-size: x-large;
+    color: black;
+    text-decoration: underline;
+}
+
+a.main_link:hover {
+    color: #cc0000;
+    text-decoration: none;
+}
+
+a.help_link {
+    font-size: small;
+    color: grey;
+    text-decoration: underline;
+}
+
+a.help_link:hover {
+    text-decoration: none;
+}
+
+a.other {
+    color: black;
+    text-decoration: underline;
+}
+
+a.other:hover {
+    color: #cc0000;
+    text-decoration: none;
+}

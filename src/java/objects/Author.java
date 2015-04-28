@@ -9,6 +9,7 @@ package objects;
  * @author Иван
  */
 public class Author {
+
     private long authorId;
     private String name = "";
     private String surname = "";
@@ -40,7 +41,11 @@ public class Author {
      * @param name the name to set
      */
     public void setName(String name) {
-        this.name = name;
+        if (name == null) {
+            this.name = "";
+        } else {
+            this.name = name;
+        }
     }
 
     /**
@@ -54,7 +59,11 @@ public class Author {
      * @param surname the surname to set
      */
     public void setSurname(String surname) {
-        this.surname = surname;
+        if (surname == null) {
+            this.surname = "";
+        } else {
+            this.surname = surname;
+        }
     }
 
     /**
@@ -68,7 +77,11 @@ public class Author {
      * @param middlename the middlename to set
      */
     public void setMiddlename(String middlename) {
-        this.middlename = middlename;
+        if (middlename == null) {
+            this.middlename = "";
+        } else {
+            this.middlename = middlename;
+        }
     }
 
     /**
