@@ -18,12 +18,20 @@
     </head>
     <% String ROOT = request.getContextPath();%>
     <%= HTMLHelper.includeCSS(ROOT)%>
+    <jsp:include page="/WEB-INF/headers/search.jsp" flush="true"/>
     <body>
         <%
             List<Book> books = (List<Book>) request.getAttribute("books");
             if (books == null) {
                 out.print("fatal error");
                 return;
+            }
+            String searchText = request.getParameter("search_text");
+            String searchParameter;
+            if (searchText == null || searchText.isEmpty()) {
+                searchParameter = "";
+            } else {
+                searchParameter = "&search_text=" + searchText;
             }
         %> 
         <table border=1 class="content_table">
@@ -45,10 +53,10 @@
                         for (Author author : book.getAuthors()) {
                             String hrefString = author.getSurname() + " "
                                     + author.getName().charAt(0) + "."
-                                    + (!author.getMiddlename().isEmpty() ? (author.getMiddlename().charAt(0) +  ".") : "");
+                                    + (!author.getMiddlename().isEmpty() ? (author.getMiddlename().charAt(0) + ".") : "");
                     %>
                     <a class="help_link" href="<%= ROOT%>/author?author_id=<%= author.getAuthorId()%>"><%= hrefString%></a>
-                    <%= (i < max ? " " : "") %>
+                    <%= (i < max ? " " : "")%>
                     <%
                             i++;
                         }
@@ -73,42 +81,36 @@
         <%
             long totalAmount = (Long) request.getAttribute("total_amount");
             long first = (Long) request.getAttribute("first");
-            long last = (Long) request.getAttribute("last");
             int addition = (totalAmount % DEFAULT_PAGE_SIZE) == 0 ? 0 : 1;
-            //out.print("total = " + totalAmount + "<br>");
-            //out.print("DEFAULT_PAGE_SIZE = " + DEFAULT_PAGE_SIZE + "<br>");
             long currentPage = (first - 1) / DEFAULT_PAGE_SIZE + 1;
             if (currentPage != 1) {
                 long curFirst = first - DEFAULT_PAGE_SIZE;
-                long curLast = curFirst +DEFAULT_PAGE_SIZE - 1;
-                %>
-                <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%>&last=<%= curLast%>&total_amount=<%= totalAmount%>">
-                <<</a>
-                <%
-            }
-            long maxPage = (totalAmount / DEFAULT_PAGE_SIZE + addition);
-            for (long i = 1; i <= maxPage; i++) {
-                long curFirst = 1 + (i - 1) * DEFAULT_PAGE_SIZE;
-                long curLast = curFirst + DEFAULT_PAGE_SIZE - 1;
-                long pageNum = i;
-                if (pageNum != currentPage) {%>
-        <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%>&last=<%= curLast%>&total_amount=<%= totalAmount%>">
-            <%= pageNum%></a>
+        %>
+        <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= searchParameter%>">
+            <<</a>
             <%
-            } else {
-            %>
-            <%= pageNum%>
-            <%
+                }
+                long maxPage = (totalAmount / DEFAULT_PAGE_SIZE + addition);
+                for (long i = 1; i <= maxPage; i++) {
+                    long curFirst = 1 + (i - 1) * DEFAULT_PAGE_SIZE;
+                    long pageNum = i;
+                        if (pageNum != currentPage) {%>
+                <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= searchParameter%>">
+                    <%= pageNum%></a>
+                    <%
+                    } else {
+                        %>
+                        <%= pageNum%>
+                        <%
                     }
                 }
-            if (currentPage != maxPage) {
-                long curFirst = first + DEFAULT_PAGE_SIZE;
-                long curLast = Math.min(curFirst +DEFAULT_PAGE_SIZE - 1, totalAmount);
-                %>
-                <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%>&last=<%= curLast%>&total_amount=<%= totalAmount%>">
-                >></a>
-                <%
-            }
+                if (currentPage != maxPage) {
+                    long curFirst = first + DEFAULT_PAGE_SIZE;
+            %>
+        <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= searchParameter%>">
+            >></a>
+            <%
+                }
             %>
 
     </center>

@@ -21,7 +21,7 @@ import static common.Constants.*;
  * @author Иван
  */
 @WebServlet(name = "ShopServlet", loadOnStartup = 1, urlPatterns = {
-        "/books"})
+        "/books", "/search"})
 public class ShopServlet extends HttpServlet {
 
     private final Selector selector = new Selector();
@@ -73,6 +73,19 @@ public class ShopServlet extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+    private String prepareForSearch(String searchText) {
+        StringBuilder sb = new StringBuilder();
+        for(char ch : searchText.toCharArray()) {
+            if (Character.isLetterOrDigit(ch) || ch == ' ') {
+                sb.append(ch);
+            }
+            else {
+                sb.append(' ');
+            }
+        }
+        return sb.toString().replaceAll("\\s+", " ").trim().toLowerCase();
+    }
+    
     private void showBooks(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         long first;
@@ -80,26 +93,27 @@ public class ShopServlet extends HttpServlet {
         String firstString = request.getParameter("first");
         if (firstString != null) {
             first = Long.parseLong(firstString);
-            last = Long.parseLong(request.getParameter("last"));
         } else {
             first = 1;
-            last = DEFAULT_PAGE_SIZE;
         }
-        // Добавить проверку условий фильтрации!!
-        String totalAmountString =request.getParameter("total_amount");
+        last = first + DEFAULT_PAGE_SIZE - 1;
+        List<Book> books;
         long totalAmount;
-        if (totalAmountString == null) {
-            // Добавить проверку условий фильтрации!!
+        String searchText = request.getParameter("search_text");
+        if (searchText == null || searchText.isEmpty()) {
+            books = selector.getBooks(first, last);
             totalAmount = selector.getBooksCount();
         } else {
-            totalAmount = Long.parseLong(totalAmountString);
+            String preparedSearchText = prepareForSearch(searchText);
+            books = selector.findBooks(preparedSearchText, first, last);
+            totalAmount = selector.getBooksCount(preparedSearchText);
         }
-        List<Book> books = selector.getBooks(first, last);
-        last = first + books.size();
+        // Добавить проверку условий фильтрации!!
+
+        
         request.setAttribute("books", books);
         request.setAttribute("total_amount", totalAmount);
         request.setAttribute("first", first);
-        request.setAttribute("last", last);
         request.getRequestDispatcher("/WEB-INF/books.jsp").forward(request, response);
     }
 }

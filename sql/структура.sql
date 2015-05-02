@@ -75,6 +75,58 @@ create table shopping_carts
     amount number
 );
 
+
+create table search_results
+(
+    search_text varchar2(255),
+    book_id number CONSTRAINT search_results_fk_book_id REFERENCES books(book_id) ON DELETE CASCADE,
+    search_timestamp timestamp default current_timestamp
+);
+
+-- Если в таблице search_results скопилось слишком много результатов поиска, то удаляем старые результаты поиска
+create or replace trigger search_results_before_trigger
+    before insert on search_results
+    DECLARE
+        results_amount number;
+        max_results constant number := 10;
+        results_to_delete constant number := 5;
+        min_minutes constant number := 2;
+    begin
+        select count(0) into results_amount from (select distinct search_text from search_results);
+        if results_amount >= max_results then
+            delete 
+                from search_results 
+            where 
+                search_text in 
+                (
+                    select
+                        search_text 
+                    from 
+                    (
+                        select distinct
+                            search_text
+                        from
+                            search_results s
+                        where
+                            extract(minute from(current_timestamp - search_timestamp)) >= min_minutes
+                        order by 
+                        (
+                            select
+                                search_timestamp
+                            from
+                                search_results ss
+                            where
+                                ss.search_text = s.search_text
+                                and rownum = 1
+                        )
+                    )
+                    where 
+                        rownum <= results_to_delete
+                );
+        end if;
+    end;
+/
+
 -- Генерит уникальный ID для таблицы. Если entered_id не null, то его и возвращает
 create or replace function get_table_id(entered_id number, table_name varchar2, column_name varchar2, seq_name varchar2) return number
     is
@@ -225,6 +277,12 @@ insert into books(book_id, description, title, link, cost, release_date, categor
     values (5, '«Автостопом по галактике» (англ. The Hitchhiker’s Guide to the Galaxy или дословно «Путеводитель по галактике для автостопщиков», «Путеводитель для путешествующих по галактике автостопом», 1979) — юмористический фантастический роман английского писателя Дугласа Адамса. Первая книга одноимённой серии.', 'Автостопом по галактике', 'www.Guide_to_the_Galaxy.com', 0, to_date('1979', 'YYYY'), 3, 1);
 insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
     values (6, '«Винни-Пух» представляет собой дилогию, но каждая из двух книг Милна распадается на 10 рассказов (stories) с собственным сюжетом.', 'Винни-Пух', 'www.winny.com', 0, to_date('1928', 'YYYY'), 5, 1);
+insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
+    values (7, '«Сказка о царе Салтане, о сыне его славном и могучем богатыре князе Гвидоне Салтановиче и о прекрасной царевне Лебеди» (укороченный вариант названия — «Сказка о царе Салтане») — сказка в стихах А. С. Пушкина. Создана в 1831 году, впервые издана в 1832 году.', 'Сказка о царе Салтане', 'www.saltan.com', 0, to_date('1832', 'YYYY'), 5, 1);
+insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
+    values (8, '«Ска́зка о рыбаке́ и ры́бке» — сказка Александра Сергеевича Пушкина. Написана 14 октября 1833 года. Впервые напечатана в 1835 году в журнале «Библиотека для чтения»', 'Сказка о рыбаке и рыбке', 'www.fish_and_fisher.com', 0, to_date('1835', 'YYYY'), 5, 1);
+insert into books(book_id, description, title, link, cost, release_date, category_id, is_shown)
+    values (9, '«Сказка о попе и о работнике его Балде» — сказка А. С. Пушкина. При жизни поэта не печаталась. Написана в Болдине 13 сентября 1830 года. Основой послужила русская народная сказка, записанная Пушкиным в Михайловском.', 'Сказка о попе и о работнике его Балде', 'www.pope_and_noodle.com', 0, to_date('1830', 'YYYY'), 5, 1);
     
 insert into books_authors(book_id, author_id) values (1, 1);
 insert into books_authors(book_id, author_id) values (2, 1);
@@ -233,6 +291,9 @@ insert into books_authors(book_id, author_id) values (4, 3);
 insert into books_authors(book_id, author_id) values (4, 4);
 insert into books_authors(book_id, author_id) values (5, 5);
 insert into books_authors(book_id, author_id) values (6, 6);
+insert into books_authors(book_id, author_id) values (7, 1);
+insert into books_authors(book_id, author_id) values (8, 1);
+insert into books_authors(book_id, author_id) values (9, 1);
 
 update book_params set value = 'Росмен' where book_id = 1 and attr_id = 1;
 update book_params set value = 'Москва' where book_id = 1 and attr_id = 2;

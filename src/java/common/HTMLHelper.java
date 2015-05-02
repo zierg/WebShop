@@ -25,4 +25,19 @@ public final class HTMLHelper {
     public static String includeCSS(String root) {
         return "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + root + CSS + "\" />";
     }
+    
+    /**
+     * Метод можно использовать, если строка может быть null и требуется
+     * выводить вместо null пустую строку ("")
+     *
+     * @param source исходная строка
+     * @return исходную строку, если она не null, иначе ""
+     */
+    public static String fromNull(String source) {
+        if (source == null) {
+            return "";
+        } else {
+            return source;
+        }
+    }
 }

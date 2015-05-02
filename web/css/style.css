@@ -128,3 +128,14 @@ a.other:hover {
     color: #cc0000;
     text-decoration: none;
 }
+
+/*
+    Текстовые поля.
+*/
+input.other {
+    padding: 5px 3px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #cc0000;
+    font: normal 0.8em tahoma;
+}

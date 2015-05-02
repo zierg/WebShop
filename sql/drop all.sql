@@ -1,3 +1,4 @@
+drop table search_results;
 drop table shopping_carts;
 drop table history;
 drop table users;
