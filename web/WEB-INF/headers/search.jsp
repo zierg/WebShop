@@ -22,7 +22,7 @@
             <table border=0>
                 <tr>
                     <td>
-                        <input class="other" type="text" name="search_text" value="<%= enteredSearchText%>" />
+                        <input width="1000"  type="text" name="search_text" value="<%= enteredSearchText%>" />
                         <br />
                         <input type="checkbox" name="in_description" <%= inDescription ? "checked" : "" %>/> <font size ="2">Искать в описаниях</font>
                     </td>

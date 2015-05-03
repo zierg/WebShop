@@ -52,20 +52,33 @@
 table.content_table {
     margin-left: auto; /* Чтобы была по центру */
     margin-right: auto; /* Чтобы была по центру */
-    background-color:#fafafa;
+    background-color:#f9f9ff;
     border-collapse: collapse;
-    border: 2px solid #cc0000;
-    width: 100%;
+    border: 2px solid #4682B4;
+    width: 99%;
     min-width: 700px;
 }
 
 table.item_table {
     margin-left: auto; /* Чтобы была по центру */
     margin-right: auto; /* Чтобы была по центру */
-    background-color:#fafafa;
+    background-color:#f9f9ff;
     border-collapse: collapse;
-    border: 2px solid #cc0000;
-    width: 100%;
+    border: 2px solid #4682B4;
+    width: 99%;
+}
+
+table.main_table {
+    margin-left: auto; /* Чтобы была по центру */
+    margin-right: auto; /* Чтобы была по центру */
+    border-color: #4682B4;
+    border-collapse: collapse;
+    width: 95%;
+}
+
+.news {
+    border-style: solid;
+    border-color: #4682B4;
 }
 
 td.item {
@@ -139,7 +152,7 @@ a.main_link {
 }
 
 a.main_link:hover {
-    color: #cc0000;
+    
     text-decoration: none;
 }
 
@@ -153,13 +166,29 @@ a.help_link:hover {
     text-decoration: none;
 }
 
+a.header {
+    font-size: large;
+    font-variant: small-caps;
+    color: #25258b;
+    text-decoration: underline;
+}
+
+a.header:hover {
+    text-decoration: none;
+}
+
+td.header {
+    border: 2px solid #4682B4;
+    background-color: #f9f9ff;
+}
+
 a.other {
     color: black;
     text-decoration: underline;
 }
 
 a.other:hover {
-    color: #cc0000;
+    
     text-decoration: none;
 }
 
@@ -170,6 +199,17 @@ input.other {
     padding: 5px 3px;
     border-style: solid;
     border-width: 1px;
-    border-color: #cc0000;
+    border-color: #4682B4;
     font: normal 0.8em tahoma;
+}
+
+input.search {
+    border-style: solid;
+    border-width: 1px;
+    border-color: #4682B4;
+    font: normal 0.8em tahoma;
+}
+
+body {
+    margin: 0;
 }

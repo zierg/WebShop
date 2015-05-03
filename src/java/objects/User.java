@@ -18,7 +18,7 @@ public class User {
    private String mail;
    private String login;
    private String password;
-   private int is_admin;
+   private boolean isAdmin;
 
     /**
      * @return the user_id
@@ -119,16 +119,16 @@ public class User {
     }
 
     /**
-     * @return the is_admin
+     * @return the isAdmin
      */
-    public int getIs_admin() {
-        return is_admin;
+    public boolean getIsAdmin() {
+        return isAdmin;
     }
 
     /**
-     * @param is_admin the is_admin to set
+     * @param isAdmin the is_admin to set
      */
-    public void setIs_admin(int is_admin) {
-        this.is_admin = is_admin;
+    public void setIsAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
     }
 }

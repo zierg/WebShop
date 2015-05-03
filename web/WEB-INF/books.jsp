@@ -18,7 +18,7 @@
     </head>
     <% String ROOT = request.getContextPath();%>
     <%= HTMLHelper.includeCSS(ROOT)%>
-    <jsp:include page="/WEB-INF/headers/search.jsp" flush="true"/>
+    <jsp:include page="/WEB-INF/headers/choose_header.jsp" flush="true"/>
     <body>
         <%
             List<Book> books = (List<Book>) request.getAttribute("books");

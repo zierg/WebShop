@@ -4,39 +4,49 @@
     Author     : Иван
 --%>
 
-
-<%@page import="objects.BookParam"%>
-<%@page import="dao.BookParamsDao"%>
-<%@page import="objects.BookAttr"%>
-<%@page import="dao.BookAttrsDao"%>
-<%@page import="oracle.OracleDaoFactory"%>
-<%@page import="dao.DaoFactory"%>
-<%@page import="common.DatabaseHelper"%>
 <%@page import="common.HTMLHelper"%>
-<%@page import="objects.Book"%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Книжный магазин</title>
     </head>
-    <body>
-        <h1>Hello World!</h1>
-    </body>
-    <%
-        /*DaoFactory f = new OracleDaoFactory();
-        BookParamsDao dao = f.getBookParamsDao();
-        for (BookParam a : dao.getParamsByBookId(1)) {
-            out.print(a.getBookId() + ": ");
-            out.print(a.getAttr().getName() + " = " + a.getValue());
-            out.print("<br>");
-        }*/
-        
-    %>
     <% String ROOT = request.getContextPath();%>
-    <a href="<%= ROOT %>/books">книги</a><br />
-    <a href="/youraction" data-paypal-button="true">
-  <img src="//www.paypalobjects.com/en_US/i/btn/btn_xpressCheckout.gif" alt="Check out with PayPal" />
-</a>
+    <%= HTMLHelper.includeCSS(ROOT)%>
+    <jsp:include page="/WEB-INF/headers/choose_header.jsp" flush="true"/>
+    <body>
+        <table class="main_table">
+            <tr>
+                <th width="20%" class="news" style="border-width: 2px 2px 1px 2px;">
+                    Новости
+                </th>
+                <td rowspan="2">
+            <center>
+                    <%
+                        char[] colorCharacters = "0123456789abcdef".toCharArray();
+                        char[] currentColor = new char[6];
+                        char[] text = "Здесь может быть ваша реклама".toCharArray();
+                        for(char c : text) {
+                            for (int i = 0; i < 6; i++) {
+                                int charNum = (int) ((Math.random()*0.99) * colorCharacters.length);
+                                currentColor[i] = colorCharacters[charNum];
+                            }
+                            int size = (int) (Math.random() * 7);
+                            %>
+                            <font size="<%= size %>" color="<%= new String(currentColor) %>"><%= c %></font>
+                            <%
+                        }
+                    %>
+                    </center>
+                </td>
+            </tr>
+            <tr>
+                <td class="news" style="border-width: 1px 2px 2px 2px;">
+                    Новость
+                </td>
+            </tr>
+        </table>
+    </body>
 </html>

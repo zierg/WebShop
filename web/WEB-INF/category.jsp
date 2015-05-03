@@ -22,7 +22,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title><%= category.getTitle() %></title>
     </head>
-    <jsp:include page="/WEB-INF/headers/search.jsp" flush="true"/>
+    <jsp:include page="/WEB-INF/headers/choose_header.jsp" flush="true"/>
     <body>
         <table border=1 class="item_table">
             <tr>

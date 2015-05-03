@@ -4,6 +4,8 @@
  */
 package common;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import objects.Author;
 import objects.Book;
 
@@ -67,5 +69,10 @@ public final class HTMLHelper {
     
     public static String getInCartButtonCode(Book book) {
         return "В корзину";
+    }
+    
+    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
+    public static String makeYear(Date date) {
+        return dateFormat.format(date);
     }
 }
