@@ -142,6 +142,11 @@ public class Selector {
             + "        \n"
             + "    order by b.title) t";
 
+    private static final String SELECT_BOOKS_BY_AUTHOR = BOOK_SELECT_FOR_LIST + 
+            " and exists(select 0 from books_authors where book_id = b.book_id and author_id = ?)";
+    private static final String SELECT_BOOKS_BY_CATEGORY = BOOK_SELECT_FOR_LIST + 
+            " and b.category_id = ?";
+    
     public Selector() {
         Locale.setDefault(Locale.ENGLISH);
         try {
@@ -250,6 +255,53 @@ public class Selector {
         return books;
     }
 
+    public List<Book> getBooksByAuthorId(long first, long last, long authorId) {
+        List<Book> books = new ArrayList<>();
+        try (Connection con = getConnection()) {
+            PreparedStatement ps = con.prepareStatement("select * from (" 
+                    + "select t.*, rownum pos from ("
+                    + SELECT_BOOKS_BY_AUTHOR + ") t order by t.title) where pos between ? and ?");
+            ps.setLong(1, authorId);
+            ps.setLong(2, first);
+            ps.setLong(3, last);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Category category = makeCategoryForBook(rs);
+                Book book = makeBook(rs, category, false);
+                fillBookAuthors(con, book);
+                books.add(book);
+            }
+        } catch (SQLException ex) {
+            throw new DaoException(ex);
+        }
+        return books;
+    }
+    
+    public List<Book> getBooksByCategoryId(long first, long last, long categoryId) {
+        List<Book> books = new ArrayList<>();
+        try (Connection con = getConnection()) {
+            PreparedStatement ps = con.prepareStatement("select * from (" 
+                    + "select t.*, rownum pos from ("
+                    + SELECT_BOOKS_BY_CATEGORY + ") t order by t.title) where pos between ? and ?");
+            ps.setLong(1, categoryId);
+            ps.setLong(2, first);
+            ps.setLong(3, last);
+            ResultSet rs = ps.executeQuery();
+            Category category = null;
+            while (rs.next()) {
+                if (category == null) {
+                    category = makeCategoryForBook(rs);
+                }
+                Book book = makeBook(rs, category, false);
+                fillBookAuthors(con, book);
+                books.add(book);
+            }
+        } catch (SQLException ex) {
+            throw new DaoException(ex);
+        }
+        return books;
+    }
+    
     public Book getBook(long bookId) {
         Book book = null;
         try (Connection con = getConnection()) {
@@ -267,6 +319,79 @@ public class Selector {
         return book;
     }
 
+    public Category getCategory(long categoryId) {
+        Category category = new Category();
+        try (Connection con = getConnection()) {
+            PreparedStatement ps = con.prepareStatement("select * from categories where category_id = ?");
+            ps.setLong(1, categoryId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            category.setCategoryId(categoryId);
+            category.setDescription(DatabaseHelper.toStringFromClob(rs.getClob("description")));
+            category.setTitle(rs.getString("title"));
+        } catch (SQLException ex) {
+            throw new DaoException(ex);
+        }
+        return category;
+    }
+    
+    public Author getAuthor(long authorId) {
+        Author author = null;
+        try (Connection con = getConnection()) {
+            PreparedStatement ps = con.prepareStatement("select * from authors where author_id = ?");
+            ps.setLong(1, authorId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            author = makeAuthor(rs, true);
+        } catch (SQLException ex) {
+            throw new DaoException(ex);
+        }
+        return author;
+    }
+
+    /**
+     * Посчитать количество всех книг
+     *
+     * @return
+     */
+    public long getAllBooksCount() {
+        return getBooksCount(ALL_BOOKS_SELECT);
+    }
+
+    /**
+     * Посчитать количество всех книг, найденных по запросу (запрос перед этим
+     * должен быть выполнен, т.к. данные считываются из таблицы search_results)
+     *
+     * @param searchText поисковой запрос
+     * @return
+     */
+    public long getSearchBooksCount(String searchText) {
+        return getBooksCount(BOOK_SEARCH_SELECT, searchText);
+    }
+    
+    public long getAuthorsBooksCount(long authorId) {
+        return getBooksCount(SELECT_BOOKS_BY_AUTHOR, Long.toString(authorId));
+    }
+    
+    public long getCategoryBooksCount(long categoryId) {
+        return getBooksCount(SELECT_BOOKS_BY_CATEGORY, Long.toString(categoryId));
+    }
+    
+    public long getBooksCount(String query, String ... parameters) {
+        try (Connection con = getConnection()) {
+            PreparedStatement ps = con.prepareStatement("select count(0) total_amount from (" + query + ")");
+            for (int i = 1; i <= parameters.length; i++) {
+                ps.setString(i, parameters[i-1]);
+            }
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            long count = rs.getLong("total_amount");
+            return count;
+        } catch (SQLException ex) {
+            throw new DaoException(ex);
+        }
+    }
+    
     private Category makeCategoryForBook(ResultSet rs) throws SQLException {
         Category category = new Category();
         category.setCategoryId(rs.getLong("category_id"));
@@ -290,6 +415,19 @@ public class Selector {
         return book;
     }
 
+    private Author makeAuthor(ResultSet rs, boolean allInfo) throws SQLException {
+        Author author = new Author();
+        author.setAuthorId(rs.getLong("author_id"));
+        author.setName(rs.getString("name"));
+        author.setSurname(rs.getString("surname"));
+        author.setMiddlename(rs.getString("middlename"));
+        if (allInfo) {
+            author.setImageLink(rs.getString("image_link"));
+            author.setBiography(DatabaseHelper.toStringFromClob(rs.getClob("biography")));
+        }
+        return author;
+    }
+
     /**
      * Заполнить список авторов книги
      *
@@ -303,11 +441,7 @@ public class Selector {
         List<Author> authors = book.getAuthors();
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
-            Author author = new Author();
-            author.setAuthorId(rs.getLong("author_id"));
-            author.setName(rs.getString("name"));
-            author.setSurname(rs.getString("surname"));
-            author.setMiddlename(rs.getString("middlename"));
+            Author author = makeAuthor(rs, false);
             authors.add(author);
         }
     }
@@ -332,43 +466,6 @@ public class Selector {
             param.setValue(rs.getString("value"));
             param.setAttr(attr);
             params.add(param);
-        }
-    }
-
-    /**
-     * Посчитать количество всех книг
-     *
-     * @return
-     */
-    public long getBooksCount() {
-        try (Connection con = getConnection()) {
-            PreparedStatement ps = con.prepareStatement("select count(0) total_amount from (" + ALL_BOOKS_SELECT + ")");
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            long count = rs.getLong("total_amount");
-            return count;
-        } catch (SQLException ex) {
-            throw new DaoException(ex);
-        }
-    }
-
-    /**
-     * Посчитать количество всех книг, найденных по запросу (запрос перед этим
-     * должен быть выполнен, т.к. данные считываются из таблицы search_results)
-     *
-     * @param searchText поисковой запрос
-     * @return
-     */
-    public long getBooksCount(String searchText) {
-        try (Connection con = getConnection()) {
-            PreparedStatement ps = con.prepareStatement("select count(0) total_amount from (" + BOOK_SEARCH_SELECT + ")");
-            ps.setString(1, searchText);
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            long count = rs.getLong("total_amount");
-            return count;
-        } catch (SQLException ex) {
-            throw new DaoException(ex);
         }
     }
 

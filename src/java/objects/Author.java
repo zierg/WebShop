@@ -15,6 +15,7 @@ public class Author {
     private String surname = "";
     private String middlename = "";
     private String biography = "";
+    private String imageLink = "";
 
     /**
      * @return the authorId
@@ -23,6 +24,18 @@ public class Author {
         return authorId;
     }
 
+    public String getImageLink() {
+        return imageLink;
+    }
+
+    public void setImageLink(String imageLink) {
+        if (imageLink == null) {
+            this.imageLink = "";
+        } else {
+            this.imageLink = imageLink;
+        }
+    }
+    
     /**
      * @param authorId the authorId to set
      */

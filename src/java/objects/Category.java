@@ -10,7 +10,6 @@ package objects;
  */
 public class Category {
     private long categoryId;
-    private Category parent;
     private String title = "";
     private String description = "";
 
@@ -26,20 +25,6 @@ public class Category {
      */
     public void setCategoryId(long categoryId) {
         this.categoryId = categoryId;
-    }
-
-    /**
-     * @return the parent
-     */
-    public Category getParent() {
-        return parent;
-    }
-
-    /**
-     * @param parent the parent to set
-     */
-    public void setParent(Category parent) {
-        this.parent = parent;
     }
 
     /**

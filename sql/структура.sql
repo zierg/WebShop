@@ -4,7 +4,8 @@ create table authors
     name varchar2(255),
     surname varchar2(255),
     middlename varchar2(255),
-    biography CLOB
+    biography CLOB,
+    image_link varchar2(4000)
 );
 
 create table categories
@@ -230,10 +231,10 @@ insert into book_params(book_id, attr_id) values(-1, 1);
 insert into book_params(book_id, attr_id) values(-1, 2);
 insert into book_params(book_id, attr_id) values(-1, 4);
 
-insert into authors(author_id, name, surname, middlename, biography) values (1, 'Александр', 'Пушкин', 'Сергеевич', 'Биография
+insert into authors(author_id, name, surname, middlename, biography, image_link) values (1, 'Александр', 'Пушкин', 'Сергеевич', 'Биография
 Пушкина
 на нескольких
-строчках.');
+строчках.', 'pushkin/pushkin.png');
 
 insert into authors(author_id, name, surname, middlename, biography) values (2, 'Станислав', 'Лем', '', 'Биография
 Лема

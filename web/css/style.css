@@ -55,7 +55,7 @@ table.content_table {
     background-color:#fafafa;
     border-collapse: collapse;
     border: 1px solid #cc0000;
-    width: 70%;
+    width: 100%;
     min-width: 700px;
 }
 
@@ -81,6 +81,12 @@ td.item_parameters {
 }
 
 img.book_image {
+    float:left; /* Выравнивание по левому краю */
+    margin: 7px 7px 7px 0; /* Отступы вокруг картинки */
+    max-width: 30%;
+}
+
+img.author_image {
     float:left; /* Выравнивание по левому краю */
     margin: 7px 7px 7px 0; /* Отступы вокруг картинки */
     max-width: 30%;

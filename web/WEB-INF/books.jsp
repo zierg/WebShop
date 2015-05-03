@@ -27,11 +27,17 @@
                 return;
             }
             String searchText = request.getParameter("search_text");
-            String searchParameter;
-            if (searchText == null || searchText.isEmpty()) {
-                searchParameter = "";
+            String authorIdString = request.getParameter("author_id");
+            String categoryIdString = request.getParameter("category_id");
+            String navigationParameter;
+            if (searchText != null && !searchText.isEmpty()) {
+                navigationParameter = "&search_text=" + searchText;
+            } else if (authorIdString != null && !authorIdString.isEmpty()) {
+                navigationParameter = "&author_id=" + authorIdString;
+            } else if (categoryIdString != null && !categoryIdString.isEmpty()) {
+                navigationParameter = "&category_id=" + categoryIdString;
             } else {
-                searchParameter = "&search_text=" + searchText;
+                navigationParameter = "";
             }
         %> 
         <table border=1 class="content_table">
@@ -73,7 +79,7 @@
             if (currentPage != 1) {
                 long curFirst = first - DEFAULT_PAGE_SIZE;
         %>
-        <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= searchParameter%>">
+        <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= navigationParameter%>">
             <<</a>
             <%
                 }
@@ -82,7 +88,7 @@
                     long curFirst = 1 + (i - 1) * DEFAULT_PAGE_SIZE;
                     long pageNum = i;
                         if (pageNum != currentPage) {%>
-                <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= searchParameter%>">
+                <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= navigationParameter%>">
                     <%= pageNum%></a>
                     <%
                     } else {
@@ -94,7 +100,7 @@
                 if (currentPage != maxPage) {
                     long curFirst = first + DEFAULT_PAGE_SIZE;
             %>
-        <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= searchParameter%>">
+        <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= navigationParameter%>">
             >></a>
             <%
                 }

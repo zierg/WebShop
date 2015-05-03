@@ -33,6 +33,10 @@
                     <%= HTMLHelper.getInCartButtonCode(book) %>
                 </td>
                 <td  class="item_parameters" rowspan="3">
+                    Категория: 
+                    <a class="other" href="<%= ROOT %>/category?category_id=<%= book.getCategory().getCategoryId() %>">
+                        <%= book.getCategory().getTitle() %>
+                    </a>
                     <%
                         for (BookParam p : book.getParameters()) {
                             if (!p.getValue().isEmpty()) {
