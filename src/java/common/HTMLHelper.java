@@ -63,7 +63,6 @@ public final class HTMLHelper {
                     .append((i < max ? " " : ""));
             i++;
         }
-        System.out.println(b);
         return b.toString();
     }
     

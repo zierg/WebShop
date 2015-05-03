@@ -12,13 +12,13 @@ package objects;
  */
 public class User {
    private int user_id;
-   private String name;
-   private String surname;
-   private String middlename;
-   private String mail;
-   private String login;
-   private String password;
-   private boolean isAdmin;
+   private String name = "";
+   private String surname = "";
+   private String middlename = "";
+   private String mail = "";
+   private String login = "";
+   private String password = "";
+   private boolean isAdmin = false;
 
     /**
      * @return the user_id

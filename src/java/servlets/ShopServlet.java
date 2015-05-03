@@ -15,18 +15,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import objects.Book;
 import static common.Constants.*;
+import common.UserSelector;
 import objects.Author;
 import objects.Category;
+import objects.User;
 
 /**
  *
  * @author Иван
  */
 @WebServlet(name = "ShopServlet", loadOnStartup = 1, urlPatterns = {
-        "/books", "/book", "/author", "/category"})
+    "/books", "/book", "/author", "/category", "/register", "/logout", "/login"})
 public class ShopServlet extends HttpServlet {
 
     private final Selector selector = new Selector();
+    private final UserSelector userSelector = selector.getUserSelector();
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -59,6 +62,14 @@ public class ShopServlet extends HttpServlet {
                 showCategory(request, response);
                 break;
             }
+            case "/register": {
+                registeringErrorOccured(request, response, null);
+                break;
+            }
+            case "/logout": {
+                logout(request, response);
+                break;
+            }
         }
     }
 
@@ -75,6 +86,16 @@ public class ShopServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String userPath = request.getServletPath();
+        switch (userPath) {
+            case "/register": {
+                register(request, response);
+                break;
+            }
+            case "/login": {
+                login(request, response);
+                break;
+            }
+        }
     }
 
     /**
@@ -89,18 +110,17 @@ public class ShopServlet extends HttpServlet {
 
     private String prepareForSearch(String searchText) {
         StringBuilder sb = new StringBuilder();
-        for(char ch : searchText.toCharArray()) {
+        for (char ch : searchText.toCharArray()) {
             if (Character.isLetterOrDigit(ch) || ch == ' ') {
                 sb.append(ch);
-            }
-            else {
+            } else {
                 sb.append(' ');
             }
         }
         return sb.toString().replaceAll("\\s+", " ").trim().toLowerCase();
     }
-    
-    private void showBooks(HttpServletRequest request, HttpServletResponse response) 
+
+    private void showBooks(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         long first;
         long last;
@@ -135,9 +155,12 @@ public class ShopServlet extends HttpServlet {
         } else {
             books = selector.getBooks(first, last);
             totalAmount = selector.getAllBooksCount();
-            
+
         }
-        
+
+        if (books.isEmpty()) {
+            request.setAttribute("error_text", "По данному запросу ничего не найдено.");
+        }
         request.setAttribute("books", books);
         request.setAttribute("total_amount", totalAmount);
         request.setAttribute("first", first);
@@ -153,7 +176,7 @@ public class ShopServlet extends HttpServlet {
     }
 
     private void showAuthor(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException  {
+            throws ServletException, IOException {
         long authorId = Long.parseLong(request.getParameter("author_id"));
         Author author = selector.getAuthor(authorId);
         request.setAttribute("author", author);
@@ -166,5 +189,87 @@ public class ShopServlet extends HttpServlet {
         Category category = selector.getCategory(categoryId);
         request.setAttribute("category", category);
         request.getRequestDispatcher("/WEB-INF/category.jsp").forward(request, response);
+    }
+
+    private void register(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String username = request.getParameter("username");
+
+        if (username == null || username.isEmpty()) {
+            registeringErrorOccured(request, response, "Введите имя пользователя.");
+            return;
+        }
+
+        if (userSelector.doesUserExist(username)) {
+            registeringErrorOccured(request, response, "Имя пользователя " + username + " уже занято.");
+            return;
+        }
+
+        String password1 = request.getParameter("password1");
+        String password2 = request.getParameter("password2");
+        
+        if (password1.isEmpty()) {
+            registeringErrorOccured(request, response, "Введите пароль.");
+            return;
+        }
+        
+        if (!password1.equals(password2)) {
+            registeringErrorOccured(request, response, "Введённые пароли не совпадают.");
+            return;
+        }
+        
+        User user = new User();
+        user.setLogin(username);
+        user.setPassword(password1);
+        userSelector.registerUser(user);
+        request.getSession().setAttribute("redirected_message", "Регистрация завершена! Вы можете заполнить дополнительные данные в личном кабинете.");
+        request.getSession(true).setAttribute("user", user);
+        response.sendRedirect(request.getServletContext().getContextPath() + "/books");
+    }
+
+    private void registeringErrorOccured(HttpServletRequest request, HttpServletResponse response, String errorText)
+            throws ServletException, IOException {
+        request.setAttribute("error_text", errorText);
+        request.getRequestDispatcher("/register.jsp").forward(request, response);
+    }
+
+    private void logout(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getSession(true).setAttribute("user", null);
+        response.sendRedirect(request.getServletContext().getContextPath() + "/books");
+    }
+
+    private void login(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String username = request.getParameter("username");
+
+        if (username == null || username.isEmpty()) {
+            loginErrorOccured(request, response, "Введите имя пользователя.");
+            return;
+        }
+
+        String enteringError = "Ошибка входа. Имя пользователя или пароль неверны.";
+        if (!userSelector.doesUserExist(username)) {
+            loginErrorOccured(request, response, enteringError);
+            return;
+        }
+
+        String password = request.getParameter("password");
+ 
+        
+        User user = userSelector.getUserByLogin(username);
+        if (!password.equals(user.getPassword())) {
+            loginErrorOccured(request, response, enteringError);
+            return;
+        }
+        request.getSession().setAttribute("redirected_message", "Вход выполнен.");
+        request.getSession(true).setAttribute("user", user);
+        response.sendRedirect(request.getServletContext().getContextPath() + "/books");
+    }
+    
+    private void loginErrorOccured(HttpServletRequest request, HttpServletResponse response, String errorText)
+            throws ServletException, IOException {
+        request.setAttribute("error_text", errorText);
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 }

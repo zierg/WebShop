@@ -16,17 +16,31 @@
     if (user != null && !user.getIsAdmin()) {
         showUserButtons = true;
     }
+    String errorText = (String) request.getAttribute("error_text");
+    String messageText = (String) request.getAttribute("message_text");
+    String redirectedMessage = (String) request.getSession().getAttribute("redirected_message");
 %>
 <% String ROOT = request.getContextPath();%>
 <%= HTMLHelper.includeCSS(ROOT)%>
 <html>
     <body>
-        <%= showUserButtons %>
         <table border="0" width="100%" style="border-collapse: collapse;">
             <tr>
                 <td class="header" width="50%" style="text-align: left;" colspan="2">
-                    <a class="header" href="<%= ROOT %>/login">Войти</a>
-                    <a class="header" href="<%= ROOT %>/register">Регистрация</a>
+                    <%
+                        if (showUserButtons) {
+                            %>
+                            Здравствуйте, <%= user.getLogin() %>!
+                            <a class="header" href="<%= ROOT %>/profile">Личный кабинет</a>
+                            <a class="header" href="<%= ROOT %>/logout">Выйти</a>
+                            <%
+                        } else {
+                            %>
+                            <a class="header" href="<%= ROOT %>/login.jsp">Войти</a>
+                            <a class="header" href="<%= ROOT %>/register.jsp">Регистрация</a>
+                            <%
+                        }
+                    %>
                 </td>
                 <td class="header" width="50%" style="text-align: right;" colspan="2">
                     <a class="header" href="<%= ROOT %>/cart">Корзина</a>
@@ -76,6 +90,25 @@
                 </td>
             </tr>
         </table>
+                <%
+                    if (messageText != null) {
+                        %>
+                        <font color="green"><%= messageText %><br /></font>
+                        <%
+                    }
+                    if (redirectedMessage != null) {
+                        %>
+                        <font color="green"><%= redirectedMessage %><br /></font>
+                        <%
+                        request.getSession(false).setAttribute("redirected_message", null);
+                    }
+                    if (errorText != null) {
+                        %>
+                        <font color="red"><%= errorText %><br /></font>
+                        <%
+                    }
+                    
+                %>  
                 <br />
     </body>
 </html>

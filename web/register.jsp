@@ -1,7 +1,7 @@
 <%-- 
-    Document   : login
-    Created on : 11.03.2015, 13:48:25
-    Author     : ASUS
+    Document   : register
+    Created on : 04.05.2015, 0:05:00
+    Author     : Иван
 --%>
 
 <%@page import="common.HTMLHelper"%>
@@ -10,7 +10,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Вход</title>
+        <title>Регистрация</title>
     </head>
     <body>
         <% 
@@ -20,7 +20,7 @@
         <%= HTMLHelper.includeCSS(ROOT)%>
         <jsp:include page="/WEB-INF/headers/choose_header.jsp" flush="true"/>
         <center>
-        <form action="<%= ROOT%>/login" method="POST">
+        <form action="<%= ROOT%>/register" method="POST">
             <table style="text-align: left;">
                 <tr>
                     <td>
@@ -35,12 +35,20 @@
                         Пароль:
                     </td>
                     <td>
-                        <input type="password" class="other" name="password" />
+                        <input type="password" class="other" name="password1" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Повторите пароль:
+                    </td>
+                    <td>
+                        <input type="password" class="other" name="password2" />
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2" style="text-align: center;">
-                        <input type="submit" value="Войти" />
+                        <input type="submit" value="Зарегистрироваться" />
                     </td>
                 </tr>
             </table>

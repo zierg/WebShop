@@ -149,16 +149,23 @@ public class Selector {
     private static final String SELECT_BOOKS_BY_CATEGORY = BOOK_SELECT_FOR_LIST
             + " and b.category_id = ?";
 
+    private final UserSelector userSelector;
+    
     public Selector() {
         Locale.setDefault(Locale.ENGLISH);
         try {
             InitialContext initContext;
             initContext = new InitialContext();
             dataSource = (DataSource) initContext.lookup("java:comp/env/jdbc/ShopDataSource");
-
+            userSelector = new UserSelector(dataSource);
         } catch (NamingException ex) {
             LOG.error("Ошибка чтения ресурса базы данных.", ex);
+            throw new DaoException(ex);
         }
+    }
+    
+    public UserSelector getUserSelector() {
+        return userSelector;
     }
 
     private Connection getConnection() throws SQLException {
