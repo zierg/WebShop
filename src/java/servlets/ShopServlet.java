@@ -21,7 +21,7 @@ import static common.Constants.*;
  * @author Иван
  */
 @WebServlet(name = "ShopServlet", loadOnStartup = 1, urlPatterns = {
-        "/books", "/search"})
+        "/books", "/book"})
 public class ShopServlet extends HttpServlet {
 
     private final Selector selector = new Selector();
@@ -43,6 +43,10 @@ public class ShopServlet extends HttpServlet {
         switch (userPath) {
             case "/books": {
                 showBooks(request, response);
+                break;
+            }
+            case "/book": {
+                showBook(request, response);
                 break;
             }
         }
@@ -108,12 +112,18 @@ public class ShopServlet extends HttpServlet {
             books = selector.findBooks(preparedSearchText, first, last);
             totalAmount = selector.getBooksCount(preparedSearchText);
         }
-        // Добавить проверку условий фильтрации!!
-
         
         request.setAttribute("books", books);
         request.setAttribute("total_amount", totalAmount);
         request.setAttribute("first", first);
         request.getRequestDispatcher("/WEB-INF/books.jsp").forward(request, response);
+    }
+
+    private void showBook(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        long bookId = Long.parseLong(request.getParameter("book_id"));
+        Book book = selector.getBook(bookId);
+        request.setAttribute("book", book);
+        request.getRequestDispatcher("/WEB-INF/book.jsp").forward(request, response);
     }
 }

@@ -55,26 +55,54 @@ table.content_table {
     background-color:#fafafa;
     border-collapse: collapse;
     border: 1px solid #cc0000;
-    width: 800px;
+    width: 70%;
+    min-width: 700px;
+}
+
+table.item_table {
+    margin-left: auto; /* Чтобы была по центру */
+    margin-right: auto; /* Чтобы была по центру */
+    background-color:#fafafa;
+    border-collapse: collapse;
+    border: 2px solid #cc0000;
+    width: 100%;
+}
+
+td.item {
+    padding: 10px;
+    border: 1px;
+    vertical-align: top;
+}
+
+td.item_parameters {
+    padding: 10px;
+    vertical-align: top;
+    width: 20%
+}
+
+img.book_image {
+    float:left; /* Выравнивание по левому краю */
+    margin: 7px 7px 7px 0; /* Отступы вокруг картинки */
+    max-width: 30%;
 }
 
 th.book_title {
-    width: 450px;
+    width: 63%;
     padding: 3px;
 }
 
 th.category {
-    width: 150px;
+    width: 23%;
     padding: 3px;
 }
 
 th.cost {
-    width: 50px;
+    width: 7%;
     padding: 3px;
 }
 
 th.action {
-    width: 50px;
+    width: 7%;
     padding: 3px;
 }
 

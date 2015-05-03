@@ -47,20 +47,7 @@
             <tr>
                 <td class="book_title">
                     <a class="main_link" href="<%= ROOT%>/book?book_id=<%= book.getBookId()%>"><%= book.getTitle()%></a><br>
-                    <%
-                        int i = 1;
-                        int max = book.getAuthors().size();
-                        for (Author author : book.getAuthors()) {
-                            String hrefString = author.getSurname() + " "
-                                    + author.getName().charAt(0) + "."
-                                    + (!author.getMiddlename().isEmpty() ? (author.getMiddlename().charAt(0) + ".") : "");
-                    %>
-                    <a class="help_link" href="<%= ROOT%>/author?author_id=<%= author.getAuthorId()%>"><%= hrefString%></a>
-                    <%= (i < max ? " " : "")%>
-                    <%
-                            i++;
-                        }
-                    %>
+                    <%= HTMLHelper.getBookAuthorsLinks(book, ROOT, "help_link") %>
                 </td>
                 <td class="category">
                     <a class="other" href="<%= ROOT%>/category?category_id=<%= book.getCategory().getCategoryId()%>">
@@ -70,7 +57,7 @@
                     <%= book.getCost()%> р.
                 </td>
                 <td class="action">
-                    В корзину
+                    <%= HTMLHelper.getInCartButtonCode(book) %>
                 </td>
             </tr>
             <%

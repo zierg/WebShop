@@ -16,6 +16,7 @@ import java.util.List;
 public class Book {
     private long bookId;
     private String description = "";
+    private String imageLink = "";
     private String title = "";
     private String link = "";
     private double cost;
@@ -23,13 +24,26 @@ public class Book {
     private Category category;
     private boolean isShown;
     private List<Author> authors = new ArrayList<>();
+    private List<BookParam> parameters = new ArrayList<>();
 
     public List<Author> getAuthors() {
         return authors;
     }
+    
+    public List<BookParam> getParameters() {
+        return parameters;
+    }
+    
+    public String getImageLink() {
+        return imageLink;
+    }
 
-    public void setAuthors(List<Author> authors) {
-        this.authors = authors;
+    public void setImageLink(String imageLink) {
+        if (imageLink == null) {
+            this.imageLink = "";
+        } else {
+            this.imageLink = imageLink;
+        }
     }
 
     /**

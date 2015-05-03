@@ -4,12 +4,12 @@
  */
 package objects;
 
-
 /**
  *
  * @author Иван
  */
 public class BookParam {
+
     private BookAttr attr = new BookAttr();
     private long bookId;
     private String value = "";
@@ -53,13 +53,17 @@ public class BookParam {
      * @param value the value to set
      */
     public void setValue(String value) {
-        this.value = value;
+        if (value == null) {
+            this.value = "";
+        } else {
+            this.value = value;
+        }
     }
 
     public long getAttrId() {
         return attr.getId();
     }
-    
+
     public void setAttrId(long attrId) {
         if (attr == null) {
             attr = new BookAttr();

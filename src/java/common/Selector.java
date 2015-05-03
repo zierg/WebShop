@@ -21,99 +21,127 @@ import objects.Author;
 import objects.Book;
 import objects.Category;
 import static common.Constants.*;
+import objects.BookAttr;
+import objects.BookParam;
 
 /**
  *
  * @author Иван
  */
 public class Selector {
-    
+
     private DataSource dataSource;
-    
-    private static final String SELECT_AUTHORS_FOR_BOOK = "select\n" +
-                                        "  a.author_id\n" +
-                                        "  , a.name\n" +
-                                        "  , a.surname\n" +
-                                        "  , a.middlename\n" +
-                                        "from\n" +
-                                        "  authors a\n" +
-                                        "  , books_authors ba\n" +
-                                        "where\n" +
-                                        "  a.author_id = ba.author_id\n" +
-                                        "  and ba.book_id = ?";
-    
-    private static final String BOOK_SELECT = "select \n" +
-                                    "    b.book_id\n"
-                                  + "  , b.title\n"
-                                  + "  , b.cost\n"
-                                  + "  , b.category_id\n" +
-                                    "    , cat.title cat_name\n" +
-                                    "  from\n" +
-                                    "    books b\n" +
-                                    "    , categories cat\n" +
-                                    "  where\n" +
-                                    "    b.category_id = cat.category_id\n" +
-                                    "    and b.is_shown = 1\n";
-    
+    private static final String SELECT_AUTHORS_FOR_BOOK =
+            "select\n"
+            + "  a.author_id\n"
+            + "  , a.name\n"
+            + "  , a.surname\n"
+            + "  , a.middlename\n"
+            + "from\n"
+            + "  authors a\n"
+            + "  , books_authors ba\n"
+            + "where\n"
+            + "  a.author_id = ba.author_id\n"
+            + "  and ba.book_id = ?";
+    private static final String SELECT_PARAMETERS_FOR_BOOK =
+            "select\n"
+            + "    a.name attr_name\n"
+            + "    , p.value\n"
+            + "    , p.attr_id\n"
+            + "from\n"
+            + "    book_attrs a\n"
+            + "    , book_params p\n"
+            + "where\n"
+            + "    p.book_id = ?\n"
+            + "    and p.attr_id = a.attr_id";
+    private static final String BOOK_SELECT_FOR_LIST =
+            "select \n"
+            + "    b.book_id\n"
+            + "  , b.title\n"
+            + "  , b.cost\n"
+            + "  , b.category_id\n"
+            + "    , cat.title cat_name\n"
+            + "  from\n"
+            + "    books b\n"
+            + "    , categories cat\n"
+            + "  where\n"
+            + "    b.category_id = cat.category_id\n"
+            + "    and b.is_shown = 1\n";
+    private static final String ONE_BOOK_SELECT =
+            "select \n"
+            + "    b.book_id\n"
+            + "    , b.title\n"
+            + "    , b.cost\n"
+            + "    , b.category_id\n"
+            + "    , cat.title cat_name\n"
+            + "    , b.description\n"
+            + "    , b.release_date\n"
+            + "    , b.link\n"
+            + "    , b.is_shown\n"
+            + "    , b.image_link\n"
+            + "from\n"
+            + "    books b\n"
+            + "    , categories cat\n"
+            + "where\n"
+            + "    b.book_id = ?\n"
+            + "    and b.category_id = cat.category_id";
     private static final String ALL_BOOKS_SELECT = "select t.*"
-                                + ", rownum pos\n "
-                                + " from"
-                                + "("
-                                + BOOK_SELECT
-                                    + " order by b.title) t" +
-                                    "  ";
-    
+            + ", rownum pos\n "
+            + " from"
+            + "("
+            + BOOK_SELECT_FOR_LIST
+            + " order by b.title) t"
+            + "  ";
     private static final String BOOK_SEARCH_SELECT = "select t.*"
-                                + ", rownum pos\n "
-                                + " from"
-                                + "("
-                                + BOOK_SELECT
-                                    + " and b.book_id in"
-                                    + "(select book_id from search_results where search_text = ?)"
-                                    + "order by b.title) t" +
-                                    "  ";
-    
+            + ", rownum pos\n "
+            + " from"
+            + "("
+            + BOOK_SELECT_FOR_LIST
+            + " and b.book_id in"
+            + "(select book_id from search_results where search_text = ?)"
+            + "order by b.title) t"
+            + "  ";
     private static final String SEARCH_INSERT_STATEMENT =
-"insert into search_results (search_text, book_id)\n" +
-"select \n" +
-"    :1 search_text\n" +
-"    , t.book_id\n" +
-"from\n" +
-"    (select \n" +
-"        b.book_id\n" +
-"        , b.title\n" +
-"        , b.cost\n" +
-"        , b.category_id\n" +
-"        , cat.title cat_name\n" +
-"    from\n" +
-"        books b\n" +
-"        , categories cat\n" +
-"    where\n" +
-"        b.category_id = cat.category_id\n" +
-"        and b.is_shown = 1\n" +
-"        and \n" +
-"        (\n" +
-"            like_expression[b.title][and]\n" +
-"            or like_expression[cat.title][and]\n" +
-"            or exists (\n" +
-"                select\n" +
-"                    0\n" +
-"                from\n" +
-"                    authors a\n" +
-"                    , books_authors ba\n" +
-"                where\n" +
-"                    ba.book_id = b.book_id\n" +
-"                    and a.author_id = ba.author_id\n" +
-"                    and (\n" +
-"                        like_expression[a.name][or]\n" +
-"                        or like_expression[a.middlename][or]\n" +
-"                        or like_expression[a.surname][or]\n" +
-"                    )\n" +
-"            )\n" +
-"        )\n" +
-"        \n" +
-"    order by b.title) t";
-    
+            "insert into search_results (search_text, book_id)\n"
+            + "select \n"
+            + "    :1 search_text\n"
+            + "    , t.book_id\n"
+            + "from\n"
+            + "    (select \n"
+            + "        b.book_id\n"
+            + "        , b.title\n"
+            + "        , b.cost\n"
+            + "        , b.category_id\n"
+            + "        , cat.title cat_name\n"
+            + "    from\n"
+            + "        books b\n"
+            + "        , categories cat\n"
+            + "    where\n"
+            + "        b.category_id = cat.category_id\n"
+            + "        and b.is_shown = 1\n"
+            + "        and \n"
+            + "        (\n"
+            + "            like_expression[b.title][and]\n"
+            + "            or like_expression[cat.title][and]\n"
+            + "            or exists (\n"
+            + "                select\n"
+            + "                    0\n"
+            + "                from\n"
+            + "                    authors a\n"
+            + "                    , books_authors ba\n"
+            + "                where\n"
+            + "                    ba.book_id = b.book_id\n"
+            + "                    and a.author_id = ba.author_id\n"
+            + "                    and (\n"
+            + "                        like_expression[a.name][or]\n"
+            + "                        or like_expression[a.middlename][or]\n"
+            + "                        or like_expression[a.surname][or]\n"
+            + "                    )\n"
+            + "            )\n"
+            + "        )\n"
+            + "        \n"
+            + "    order by b.title) t";
+
     public Selector() {
         Locale.setDefault(Locale.ENGLISH);
         try {
@@ -125,44 +153,44 @@ public class Selector {
             LOG.error("Ошибка чтения ресурса базы данных.", ex);
         }
     }
-    
+
     private Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
-    
+
     /**
-     * Поиск книг. Ищет по автору, категории, названию одновременно.
-     * Ищет введённые слова отдельно. Например "кап доч" - найдёт Капитанская дочка.
-     * "ильф петров" - найдёт все книги обоих авторов.
-     * Поиск работает следующим образом:
-     * в таблице search_results хранятся результаты выполнения поисковых запросов.
-     * Сначала проверяется, есть ли в этой таблице поиск по такому же запросу
-     * (при этом поиск должен был выполняться недавно, насколько недавно - отвечает
-     * константа Constants.MAX_SEARCH_RESULT_AGE_MINUTES).
-     * Если есть, то возвращаются все книги, сохранённые в результате этого поиска.
-     * Если же нет, то сначала удаляются все старые результаты этого запроса,
-     * затем осуществляется поиск и вставляютс новые результаты,
-     * которые и возвращаются.
+     * Поиск книг. Ищет по автору, категории, названию одновременно. Ищет
+     * введённые слова отдельно. Например "кап доч" - найдёт Капитанская дочка.
+     * "ильф петров" - найдёт все книги обоих авторов. Поиск работает следующим
+     * образом: в таблице search_results хранятся результаты выполнения
+     * поисковых запросов. Сначала проверяется, есть ли в этой таблице поиск по
+     * такому же запросу (при этом поиск должен был выполняться недавно,
+     * насколько недавно - отвечает константа
+     * Constants.MAX_SEARCH_RESULT_AGE_MINUTES). Если есть, то возвращаются все
+     * книги, сохранённые в результате этого поиска. Если же нет, то сначала
+     * удаляются все старые результаты этого запроса, затем осуществляется поиск
+     * и вставляютс новые результаты, которые и возвращаются.
+     *
      * @param searchText
      * @param first
      * @param last
-     * @return 
+     * @return
      */
     public List<Book> findBooks(String searchText, long first, long last) {
         List<Book> books = new ArrayList<>();
         try (Connection con = getConnection()) {
             PreparedStatement checkCachedSearch = con.prepareStatement(
-"select\n" +
-"     count(0) amount\n" +
-"from (\n" +
-"    select extract(minute from(current_timestamp - search_timestamp)) search_age \n" +
-"from\n" +
-"    search_results\n" +
-"where \n" +
-"    search_text = ? \n" +
-"    and rownum = 1)\n" +
-"where\n" +
-"    search_age < ?");
+                    "select\n"
+                    + "     count(0) amount\n"
+                    + "from (\n"
+                    + "    select extract(minute from(current_timestamp - search_timestamp)) search_age \n"
+                    + "from\n"
+                    + "    search_results\n"
+                    + "where \n"
+                    + "    search_text = ? \n"
+                    + "    and rownum = 1)\n"
+                    + "where\n"
+                    + "    search_age < ?");
             checkCachedSearch.setString(1, searchText);
             checkCachedSearch.setInt(2, MAX_SEARCH_RESULT_AGE_MINUTES);
             ResultSet rsCheck = checkCachedSearch.executeQuery();
@@ -177,15 +205,15 @@ public class Selector {
                 insertPS.setString(1, searchText);
                 insertPS.execute();
             }
-            
-            PreparedStatement searchPS = con.prepareStatement("select * from (" +BOOK_SEARCH_SELECT + ") where pos between ? and ?");
+
+            PreparedStatement searchPS = con.prepareStatement("select * from (" + BOOK_SEARCH_SELECT + ") where pos between ? and ?");
             searchPS.setString(1, searchText);
             searchPS.setLong(2, first);
             searchPS.setLong(3, last);
             ResultSet searchRS = searchPS.executeQuery();
-            while(searchRS.next()) {
+            while (searchRS.next()) {
                 Category category = makeCategoryForBook(searchRS);
-                Book book = makeBookForList(searchRS, category);
+                Book book = makeBook(searchRS, category, false);
                 fillBookAuthors(con, book);
                 books.add(book);
             }
@@ -194,24 +222,25 @@ public class Selector {
         }
         return books;
     }
-    
+
     /**
      * Получить диапазон книг (из отсортированного списка)
+     *
      * @param first номер первой книги
      * @param last номер второй книги
-     * @return 
+     * @return
      */
     public List<Book> getBooks(long first, long last) {
         List<Book> books = new ArrayList<>();
-        
+
         try (Connection con = getConnection()) {
-            PreparedStatement ps = con.prepareStatement("select * from (" +ALL_BOOKS_SELECT + ") where pos between ? and ?");
+            PreparedStatement ps = con.prepareStatement("select * from (" + ALL_BOOKS_SELECT + ") where pos between ? and ?");
             ps.setLong(1, first);
             ps.setLong(2, last);
             ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 Category category = makeCategoryForBook(rs);
-                Book book = makeBookForList(rs, category);
+                Book book = makeBook(rs, category, false);
                 fillBookAuthors(con, book);
                 books.add(book);
             }
@@ -220,28 +249,53 @@ public class Selector {
         }
         return books;
     }
-    
+
+    public Book getBook(long bookId) {
+        Book book = null;
+        try (Connection con = getConnection()) {
+            PreparedStatement ps = con.prepareStatement(ONE_BOOK_SELECT);
+            ps.setLong(1, bookId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            Category category = makeCategoryForBook(rs);
+            book = makeBook(rs, category, true);
+            fillBookAuthors(con, book);
+            fillBookParameters(con, book);
+        } catch (SQLException ex) {
+            throw new DaoException(ex);
+        }
+        return book;
+    }
+
     private Category makeCategoryForBook(ResultSet rs) throws SQLException {
         Category category = new Category();
         category.setCategoryId(rs.getLong("category_id"));
         category.setTitle(rs.getString("cat_name"));
         return category;
     }
-    
-    private Book makeBookForList(ResultSet rs, Category category) throws SQLException {
+
+    private Book makeBook(ResultSet rs, Category category, boolean allInfo) throws SQLException {
         Book book = new Book();
         book.setBookId(rs.getLong("book_id"));
         book.setCategory(category);
         book.setCost(rs.getDouble("cost"));
         book.setTitle(rs.getString("title"));
+        if (allInfo) {
+            book.setDescription(DatabaseHelper.toStringFromClob(rs.getClob("description")));
+            book.setLink(rs.getString("link"));
+            book.setReleaseDate(rs.getTimestamp("release_date"));
+            book.setIsShown(rs.getBoolean("is_shown"));
+            book.setImageLink(rs.getString("image_link"));
+        }
         return book;
     }
-    
+
     /**
      * Заполнить список авторов книги
+     *
      * @param con соединение с БД
      * @param book книга
-     * @throws SQLException 
+     * @throws SQLException
      */
     private void fillBookAuthors(Connection con, Book book) throws SQLException {
         PreparedStatement ps = con.prepareStatement(SELECT_AUTHORS_FOR_BOOK);
@@ -257,10 +311,34 @@ public class Selector {
             authors.add(author);
         }
     }
-    
+
+    /**
+     * Заполнить список параметров книги
+     *
+     * @param con соединение с БД
+     * @param book книга
+     * @throws SQLException
+     */
+    private void fillBookParameters(Connection con, Book book) throws SQLException {
+        PreparedStatement ps = con.prepareStatement(SELECT_PARAMETERS_FOR_BOOK);
+        ps.setLong(1, book.getBookId());
+        List<BookParam> params = book.getParameters();
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            BookParam param = new BookParam();
+            BookAttr attr = new BookAttr();
+            attr.setId(rs.getLong("attr_id"));
+            attr.setName(rs.getString("attr_name"));
+            param.setValue(rs.getString("value"));
+            param.setAttr(attr);
+            params.add(param);
+        }
+    }
+
     /**
      * Посчитать количество всех книг
-     * @return 
+     *
+     * @return
      */
     public long getBooksCount() {
         try (Connection con = getConnection()) {
@@ -273,12 +351,13 @@ public class Selector {
             throw new DaoException(ex);
         }
     }
-    
+
     /**
-     * Посчитать количество всех книг, найденных по запросу
-     * (запрос перед этим должен быть выполнен, т.к. данные считываются из таблицы search_results)
+     * Посчитать количество всех книг, найденных по запросу (запрос перед этим
+     * должен быть выполнен, т.к. данные считываются из таблицы search_results)
+     *
      * @param searchText поисковой запрос
-     * @return 
+     * @return
      */
     public long getBooksCount(String searchText) {
         try (Connection con = getConnection()) {
@@ -292,28 +371,27 @@ public class Selector {
             throw new DaoException(ex);
         }
     }
-    
-    
-    
+
     /**
-     * Создаёт условия для регистронезависимого поиска значения в колонке
-     * на основании введённой строки поиска. Пример:
-     * Введено "Пушкин: Руслан и Людмила", колонка author.surname, минимальная длина слова: 3, delim = or.
-     * Получится следующее условие (со скобками):
-     * ('and' = 'or'
-     * or lower(author.surname) like '%' || lower('Пушкин') || '%'
-     * or lower(author.surname) like '%' || lower('Руслан') || '%'
-     * or lower(author.surname) like '%' || lower('Людмила') || '%') 
+     * Создаёт условия для регистронезависимого поиска значения в колонке на
+     * основании введённой строки поиска. Пример: Введено "Пушкин: Руслан и
+     * Людмила", колонка author.surname, минимальная длина слова: 3, delim = or.
+     * Получится следующее условие (со скобками): ('and' = 'or' or
+     * lower(author.surname) like '%' || lower('Пушкин') || '%' or
+     * lower(author.surname) like '%' || lower('Руслан') || '%' or
+     * lower(author.surname) like '%' || lower('Людмила') || '%')
+     *
      * @param column имя колонки (вместе с псевдонимом таблицы)
      * @param preparedSearchText текст для поиска.
      * @param minLength минимальная длина слова
-     * @param delim разделитель частей условия. Может содержать ТОЛЬКО одно из следующих значений: or, and.
-     * @return 
+     * @param delim разделитель частей условия. Может содержать ТОЛЬКО одно из
+     * следующих значений: or, and.
+     * @return
      */
     private String getSearchCondition(String column, String preparedSearchText, int minLength, String delim) {
         StringTokenizer token = new StringTokenizer(preparedSearchText, " ");
         StringBuilder condition = new StringBuilder(" ( 'and' = '" + delim + "'");
-        while(token.hasMoreTokens()) {
+        while (token.hasMoreTokens()) {
             String next = token.nextToken();
             if (next.length() < minLength) {
                 continue;
@@ -325,13 +403,14 @@ public class Selector {
         condition.append(") ");
         return condition.toString();
     }
-    
+
     /**
-     * Заменяет в запросе выражения вида like_expression[column][or]
-     * на результат метода getSearchCondition для column и or.
+     * Заменяет в запросе выражения вида like_expression[column][or] на
+     * результат метода getSearchCondition для column и or.
+     *
      * @param select запрос (select)
      * @param searchText поисковой запрос
-     * @return 
+     * @return
      */
     private String prepareSelect(String select, String searchText) {
         String ret = select.replaceAll("like_expression\\[(.*)\\]\\[(.*)\\]",
