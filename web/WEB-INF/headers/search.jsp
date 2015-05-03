@@ -24,9 +24,9 @@
                     <td>
                         <input class="other" type="text" name="search_text" value="<%= enteredSearchText%>" />
                         <br />
-                        <input type="checkbox" name="in_description" <%= inDescription ? "checked" : "" %>/> Искать в описаниях (пока не работает) (а надо ли?)
+                        <input type="checkbox" name="in_description" <%= inDescription ? "checked" : "" %>/> <font size ="2">Искать в описаниях</font>
                     </td>
-                    <td>
+                    <td style="vertical-align: top;">
                         <input type="submit" value="Найти" />   
                     </td>
                 </tr>

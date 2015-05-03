@@ -138,15 +138,17 @@ public class Selector {
             + "                        or like_expression[a.surname][or]\n"
             + "                    )\n"
             + "            )\n"
-            + "        )\n"
-            + "        \n"
+            + "            or (\n"
+            + "                :2 = 1\n"
+            + "                and like_expression[b.description][and]\n"
+            + "            )\n"
+            + "        ) \n"
             + "    order by b.title) t";
+    private static final String SELECT_BOOKS_BY_AUTHOR = BOOK_SELECT_FOR_LIST
+            + " and exists(select 0 from books_authors where book_id = b.book_id and author_id = ?)";
+    private static final String SELECT_BOOKS_BY_CATEGORY = BOOK_SELECT_FOR_LIST
+            + " and b.category_id = ?";
 
-    private static final String SELECT_BOOKS_BY_AUTHOR = BOOK_SELECT_FOR_LIST + 
-            " and exists(select 0 from books_authors where book_id = b.book_id and author_id = ?)";
-    private static final String SELECT_BOOKS_BY_CATEGORY = BOOK_SELECT_FOR_LIST + 
-            " and b.category_id = ?";
-    
     public Selector() {
         Locale.setDefault(Locale.ENGLISH);
         try {
@@ -181,8 +183,9 @@ public class Selector {
      * @param last
      * @return
      */
-    public List<Book> findBooks(String searchText, long first, long last) {
+    public List<Book> findBooks(String searchText, long first, long last, String searchParamerers) {
         List<Book> books = new ArrayList<>();
+        String inTableText = searchParamerers + searchText;
         try (Connection con = getConnection()) {
             PreparedStatement checkCachedSearch = con.prepareStatement(
                     "select\n"
@@ -196,7 +199,7 @@ public class Selector {
                     + "    and rownum = 1)\n"
                     + "where\n"
                     + "    search_age < ?");
-            checkCachedSearch.setString(1, searchText);
+            checkCachedSearch.setString(1, inTableText);
             checkCachedSearch.setInt(2, MAX_SEARCH_RESULT_AGE_MINUTES);
             ResultSet rsCheck = checkCachedSearch.executeQuery();
             rsCheck.next();
@@ -204,15 +207,17 @@ public class Selector {
             if (!searchExists) {
                 PreparedStatement deleteOldSameSearchesPS = con.prepareStatement(
                         "delete from search_results where search_text = ?");
-                deleteOldSameSearchesPS.setString(1, searchText);
+                deleteOldSameSearchesPS.setString(1, inTableText);
                 deleteOldSameSearchesPS.execute();
+                int inDescription = searchParamerers.contains("[in_description]") ? 1 : 0;
                 PreparedStatement insertPS = con.prepareStatement(prepareSelect(SEARCH_INSERT_STATEMENT, searchText));
-                insertPS.setString(1, searchText);
+                insertPS.setString(1, inTableText);
+                insertPS.setInt(2, inDescription);
                 insertPS.execute();
             }
 
             PreparedStatement searchPS = con.prepareStatement("select * from (" + BOOK_SEARCH_SELECT + ") where pos between ? and ?");
-            searchPS.setString(1, searchText);
+            searchPS.setString(1, inTableText);
             searchPS.setLong(2, first);
             searchPS.setLong(3, last);
             ResultSet searchRS = searchPS.executeQuery();
@@ -258,7 +263,7 @@ public class Selector {
     public List<Book> getBooksByAuthorId(long first, long last, long authorId) {
         List<Book> books = new ArrayList<>();
         try (Connection con = getConnection()) {
-            PreparedStatement ps = con.prepareStatement("select * from (" 
+            PreparedStatement ps = con.prepareStatement("select * from ("
                     + "select t.*, rownum pos from ("
                     + SELECT_BOOKS_BY_AUTHOR + ") t order by t.title) where pos between ? and ?");
             ps.setLong(1, authorId);
@@ -276,11 +281,11 @@ public class Selector {
         }
         return books;
     }
-    
+
     public List<Book> getBooksByCategoryId(long first, long last, long categoryId) {
         List<Book> books = new ArrayList<>();
         try (Connection con = getConnection()) {
-            PreparedStatement ps = con.prepareStatement("select * from (" 
+            PreparedStatement ps = con.prepareStatement("select * from ("
                     + "select t.*, rownum pos from ("
                     + SELECT_BOOKS_BY_CATEGORY + ") t order by t.title) where pos between ? and ?");
             ps.setLong(1, categoryId);
@@ -301,7 +306,7 @@ public class Selector {
         }
         return books;
     }
-    
+
     public Book getBook(long bookId) {
         Book book = null;
         try (Connection con = getConnection()) {
@@ -334,7 +339,7 @@ public class Selector {
         }
         return category;
     }
-    
+
     public Author getAuthor(long authorId) {
         Author author = null;
         try (Connection con = getConnection()) {
@@ -365,23 +370,23 @@ public class Selector {
      * @param searchText поисковой запрос
      * @return
      */
-    public long getSearchBooksCount(String searchText) {
-        return getBooksCount(BOOK_SEARCH_SELECT, searchText);
+    public long getSearchBooksCount(String searchText, String searchParameters) {
+        return getBooksCount(BOOK_SEARCH_SELECT, searchParameters + searchText);
     }
-    
+
     public long getAuthorsBooksCount(long authorId) {
         return getBooksCount(SELECT_BOOKS_BY_AUTHOR, Long.toString(authorId));
     }
-    
+
     public long getCategoryBooksCount(long categoryId) {
         return getBooksCount(SELECT_BOOKS_BY_CATEGORY, Long.toString(categoryId));
     }
-    
-    public long getBooksCount(String query, String ... parameters) {
+
+    public long getBooksCount(String query, String... parameters) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement("select count(0) total_amount from (" + query + ")");
             for (int i = 1; i <= parameters.length; i++) {
-                ps.setString(i, parameters[i-1]);
+                ps.setString(i, parameters[i - 1]);
             }
             ResultSet rs = ps.executeQuery();
             rs.next();
@@ -391,7 +396,7 @@ public class Selector {
             throw new DaoException(ex);
         }
     }
-    
+
     private Category makeCategoryForBook(ResultSet rs) throws SQLException {
         Category category = new Category();
         category.setCategoryId(rs.getLong("category_id"));

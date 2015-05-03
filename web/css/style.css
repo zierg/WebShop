@@ -54,7 +54,7 @@ table.content_table {
     margin-right: auto; /* Чтобы была по центру */
     background-color:#fafafa;
     border-collapse: collapse;
-    border: 1px solid #cc0000;
+    border: 2px solid #cc0000;
     width: 100%;
     min-width: 700px;
 }

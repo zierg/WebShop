@@ -118,8 +118,12 @@ public class ShopServlet extends HttpServlet {
         String categoryIdString = request.getParameter("category_id");
         if (searchText != null && !searchText.isEmpty()) {
             String preparedSearchText = prepareForSearch(searchText);
-            books = selector.findBooks(preparedSearchText, first, last);
-            totalAmount = selector.getSearchBooksCount(preparedSearchText);
+            String inDescription = request.getParameter("in_description");
+            String searchParameters = (inDescription != null && inDescription.equals("on")) ? "[in_description]" : "";
+            books = selector.findBooks(preparedSearchText, first, last, searchParameters);
+            totalAmount = selector.getSearchBooksCount(preparedSearchText, searchParameters);
+            System.out.println("books = " + books);
+            System.out.println("total = " + totalAmount);
         } else if (authorIdString != null && !authorIdString.isEmpty()) {
             long authorId = Long.parseLong(authorIdString);
             books = selector.getBooksByAuthorId(first, last, authorId);

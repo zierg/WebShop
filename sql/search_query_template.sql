@@ -34,6 +34,9 @@ from
                         or like_expression[a.surname][or]
                     )
             )
-        )
-        
+            or (
+                :2 = 1
+                and like_expression[b.description][and]
+            )
+        ) 
     order by b.title) t
