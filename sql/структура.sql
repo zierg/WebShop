@@ -301,4 +301,6 @@ update book_params set value = 'Росмен' where book_id = 1 and attr_id = 1;
 update book_params set value = 'Москва' where book_id = 1 and attr_id = 2;
 update book_params set value = 'Русский' where book_id = 1 and attr_id = 4;
 
+insert into users (login, name, surname, middlename, mail, password) values('user', 'Петя', 'Петров', 'Петевич', 'petya@mail.ru', '1');
+
 commit;

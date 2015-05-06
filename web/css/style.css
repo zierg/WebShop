@@ -49,24 +49,34 @@
 	background-color: #903;
 }
 
-table.content_table {
+table.fields, table.centered, table.center_bordered, table.content_table, table.item_table {
     margin-left: auto; /* Чтобы была по центру */
     margin-right: auto; /* Чтобы была по центру */
-    background-color:#f9f9ff;
+}
+
+table.center_bordered, table.content_table, table.item_table {
     border-collapse: collapse;
     border: 2px solid #4682B4;
+}
+
+table.centered td
+, table.centered th
+, table.center_bordered th
+, table.center_bordered td
+, table.content_table th
+, table.content_table td {
+    padding: 3px;
+}
+
+table.content_table, table.item_table {  
+    background-color:#f9f9ff;
     width: 99%;
+}
+
+table.content_table {
     min-width: 700px;
 }
 
-table.item_table {
-    margin-left: auto; /* Чтобы была по центру */
-    margin-right: auto; /* Чтобы была по центру */
-    background-color:#f9f9ff;
-    border-collapse: collapse;
-    border: 2px solid #4682B4;
-    width: 99%;
-}
 
 table.main_table {
     margin-left: auto; /* Чтобы была по центру */
@@ -81,100 +91,55 @@ table.main_table {
     border-color: #4682B4;
 }
 
-td.item {
+td.item, td.item_parameters {
     padding: 10px;
     border: 1px;
     vertical-align: top;
 }
 
 td.item_parameters {
-    padding: 10px;
-    vertical-align: top;
     width: 20%
 }
 
-img.book_image {
+img.book_image, img.author_image {
     float:left; /* Выравнивание по левому краю */
     margin: 7px 7px 7px 0; /* Отступы вокруг картинки */
     max-width: 30%;
 }
 
-img.author_image {
-    float:left; /* Выравнивание по левому краю */
-    margin: 7px 7px 7px 0; /* Отступы вокруг картинки */
-    max-width: 30%;
+table.search td {
+    padding: 0px;
+    vertical-align: top;
+    text-align: left;
 }
 
-th.book_title {
-    width: 63%;
-    padding: 3px;
-}
-
-th.category {
-    width: 23%;
-    padding: 3px;
-}
-
-th.cost {
-    width: 7%;
-    padding: 3px;
-}
-
-th.action {
-    width: 7%;
-    padding: 3px;
-}
-
-td.book_title {
-    padding: 3px;
-}
-
-td.category {
+td.centered {
     text-align: center;
-    padding: 3px;
 }
 
-td.cost {
-    text-align: center;
-    padding: 3px;
+a {
+    text-decoration: underline;
+    color: black;
 }
 
-td.action {
-    text-align: center;
-    width: 50px;
-    padding: 3px;
+a:hover {
+    text-decoration: none;
 }
 
 a.main_link {
     font-size: x-large;
     color: black;
-    text-decoration: underline;
-}
-
-a.main_link:hover {
-    
-    text-decoration: none;
 }
 
 a.help_link {
     font-size: small;
     color: grey;
-    text-decoration: underline;
-}
-
-a.help_link:hover {
-    text-decoration: none;
 }
 
 a.header {
     font-size: large;
     font-variant: small-caps;
     color: #25258b;
-    text-decoration: underline;
-}
-
-a.header:hover {
-    text-decoration: none;
 }
 
 td.header {
@@ -182,32 +147,18 @@ td.header {
     background-color: #f9f9ff;
 }
 
-a.other {
-    color: black;
-    text-decoration: underline;
-}
-
-a.other:hover {
-    
-    text-decoration: none;
-}
-
 /*
     Текстовые поля.
 */
-input.other {
-    padding: 5px 3px;
+input.other, input.search {
     border-style: solid;
     border-width: 1px;
     border-color: #4682B4;
     font: normal 0.8em tahoma;
 }
 
-input.search {
-    border-style: solid;
-    border-width: 1px;
-    border-color: #4682B4;
-    font: normal 0.8em tahoma;
+input.other {
+    padding: 5px 3px;
 }
 
 body {

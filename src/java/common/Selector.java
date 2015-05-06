@@ -23,6 +23,7 @@ import objects.Category;
 import static common.Constants.*;
 import objects.BookAttr;
 import objects.BookParam;
+import objects.ShoppingCart;
 
 /**
  *
@@ -60,6 +61,7 @@ public class Selector {
             + "  , b.title\n"
             + "  , b.cost\n"
             + "  , b.category_id\n"
+            + "  , b.link"
             + "    , cat.title cat_name\n"
             + "  from\n"
             + "    books b\n"
@@ -417,9 +419,9 @@ public class Selector {
         book.setCategory(category);
         book.setCost(rs.getDouble("cost"));
         book.setTitle(rs.getString("title"));
+        book.setLink(rs.getString("link"));
         if (allInfo) {
             book.setDescription(DatabaseHelper.toStringFromClob(rs.getClob("description")));
-            book.setLink(rs.getString("link"));
             book.setReleaseDate(rs.getTimestamp("release_date"));
             book.setIsShown(rs.getBoolean("is_shown"));
             book.setImageLink(rs.getString("image_link"));
@@ -525,5 +527,59 @@ public class Selector {
         String ret = select.replaceAll("like_expression\\[(.*)\\]\\[(.*)\\]",
                 getSearchCondition("$1", searchText, MIN_SYMBOLS_IN_SEARCH, "$2"));
         return ret;
+    }
+    
+    public List<Book> getBooksFromCart(ShoppingCart cart) {
+        List<Book> books = new ArrayList<>();
+        List<Long> bookIds = cart.getBookIds();
+        if (bookIds.isEmpty()) {
+            return books;
+        }
+        StringBuilder b = new StringBuilder(BOOK_SELECT_FOR_LIST + " and book_id in (");
+        for (int i = 0; i < bookIds.size(); i++) {
+            b.append("?,");
+        }
+        b.replace(b.length()-1, b.length(), ")");
+        String query = b.toString();
+        System.out.println("query = " + query);
+        
+        try (Connection con = getConnection()) {
+            PreparedStatement ps = con.prepareStatement(
+                    query);
+            int i = 1;
+            for (Long id : bookIds) {
+                ps.setLong(i, id);
+                i++;
+            }
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                Category category = makeCategoryForBook(rs);
+                Book book = makeBook(rs, category, false);
+                fillBookAuthors(con, book);
+                books.add(book);
+            }
+            return books;
+        } catch (SQLException ex) {
+            throw new DaoException(ex);
+        }
+    }
+    
+    public List<Book> getBooksFromHistory(long userId) {
+        try (Connection con = getConnection()) {
+            PreparedStatement ps = con.prepareStatement(BOOK_SELECT_FOR_LIST + " and book_id in"
+                    + " (select book_id from history where user_id = ?)");
+            ps.setLong(1, userId);
+            ResultSet rs = ps.executeQuery();
+            List<Book> books = new ArrayList<>();
+            while (rs.next()) {
+                Category category = makeCategoryForBook(rs);
+                Book book = makeBook(rs, category, false);
+                fillBookAuthors(con, book);
+                books.add(book);
+            }
+            return books;
+        } catch (SQLException ex) {
+            throw new DaoException(ex);
+        }
     }
 }

@@ -45,7 +45,7 @@ public class TomcatFilter implements Filter {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Перекодировка");
             }
-        }
+        } 
         chain.doFilter(request, response);
     }
 

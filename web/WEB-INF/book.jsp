@@ -12,12 +12,15 @@
 <!DOCTYPE html>
 <html>
     <% String ROOT = request.getContextPath();
+    
         Book book = (Book) request.getAttribute("book");
-        if (book == null) {
+        Boolean purchased = (Boolean) request.getAttribute("purchased");
+        if (book == null || purchased == null) {
             out.print("fatal error");
             return;
         }
         boolean hasImage = !book.getImageLink().isEmpty();
+        String currentPath = ROOT + "/book?book_id=" + book.getBookId();
     %>
     <%= HTMLHelper.includeCSS(ROOT)%>
     <head>
@@ -30,7 +33,7 @@
             <tr>
                 <td class="item">
                     <font size="5pt"><%= book.getTitle()%></font>
-                    <%= HTMLHelper.getInCartButtonCode(book) %>
+                    <%= HTMLHelper.getInCartButtonCode(book, currentPath, request, purchased) %>
                 </td>
                 <td  class="item_parameters" rowspan="3">
                     Категория: 

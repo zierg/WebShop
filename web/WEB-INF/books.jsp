@@ -22,7 +22,8 @@
     <body>
         <%
             List<Book> books = (List<Book>) request.getAttribute("books");
-            if (books == null) {
+            List<Long> purchased = (List<Long>) request.getAttribute("purchased");
+            if (books == null || purchased == null) {
                 out.print("fatal error");
                 return;
             }
@@ -39,37 +40,17 @@
             } else {
                 navigationParameter = "";
             }
-        %> 
-        <table border=1 class="content_table">
-            <tr>
-                <th class="book_title">Название</th>
-                <th class="category">Категория</th>
-                <th class="cost">Стоимость</th>
-                <th class="action">Действия</th>
-            </tr>
-            <%
-                for (Book book : books) {
-            %> 
-            <tr>
-                <td class="book_title">
-                    <a class="main_link" href="<%= ROOT%>/book?book_id=<%= book.getBookId()%>"><%= book.getTitle()%></a><br>
-                    <%= HTMLHelper.getBookAuthorsLinks(book, ROOT, "help_link") %>
-                </td>
-                <td class="category">
-                    <a class="other" href="<%= ROOT%>/category?category_id=<%= book.getCategory().getCategoryId()%>">
-                        <%= book.getCategory().getTitle()%></a>
-                </td>
-                <td class="cost">
-                    <%= book.getCost()%> р.
-                </td>
-                <td class="action">
-                    <%= HTMLHelper.getInCartButtonCode(book) %>
-                </td>
-            </tr>
-            <%
+            
+            String queryString = request.getQueryString();
+                if (queryString != null && !queryString.isEmpty()) {
+                    queryString = "?" + queryString;
+                } else {
+                    queryString = "";
                 }
-            %>
-        </table>
+                String currentPath = ROOT + "/books" + queryString;
+        %> 
+        <%= HTMLHelper.makeBookTable(books, purchased, request, currentPath) %>
+        
     <center>
         <%
             long totalAmount = (Long) request.getAttribute("total_amount");
@@ -87,14 +68,14 @@
                 for (long i = 1; i <= maxPage; i++) {
                     long curFirst = 1 + (i - 1) * DEFAULT_PAGE_SIZE;
                     long pageNum = i;
-                        if (pageNum != currentPage) {%>
-                <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= navigationParameter%>">
-                    <%= pageNum%></a>
-                    <%
-                    } else {
-                        %>
-                        <%= pageNum%>
-                        <%
+                    if (pageNum != currentPage) {%>
+        <a class="other" href="<%= ROOT%>/books?first=<%= curFirst%><%= navigationParameter%>">
+            <%= pageNum%></a>
+            <%
+            } else {
+            %>
+            <%= pageNum%>
+            <%
                     }
                 }
                 if (currentPage != maxPage) {

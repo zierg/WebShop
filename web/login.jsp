@@ -20,31 +20,18 @@
         <%= HTMLHelper.includeCSS(ROOT)%>
         <jsp:include page="/WEB-INF/headers/choose_header.jsp" flush="true"/>
         <center>
-        <form action="<%= ROOT%>/login" method="POST">
-            <table style="text-align: left;">
-                <tr>
-                    <td>
-                        Имя пользователя:
-                    </td>
-                    <td>
-                        <input type="text" class="other" name="username" value="<%= enteredUsername %>" autofocus/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Пароль:
-                    </td>
-                    <td>
-                        <input type="password" class="other" name="password" />
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="text-align: center;">
-                        <input type="submit" value="Войти" />
-                    </td>
-                </tr>
-            </table>
-        </form>
+        <%
+            HTMLHelper.FormTextField username = new HTMLHelper.FormTextField(1);
+            HTMLHelper.FormTextField password = new HTMLHelper.FormTextField(2);
+            username.setAutofocus(true)
+                    .setName("username").setValue(enteredUsername)
+                    .setTitle("Имя пользователя:");
+            password.setName("password")
+                    .setTitle("Пароль:").setType("password");
+            HTMLHelper.FormTextField[] fields = {username, password};
+        %>
+        <%= HTMLHelper.makeFormWithFields(fields, "login", ROOT + "/login",
+                "Войти", "POST") %>
         </center>
     </body>
 </html>

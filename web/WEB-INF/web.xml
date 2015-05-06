@@ -5,7 +5,7 @@
         <filter-class>common.TomcatFilter</filter-class>
         <init-param>
             <param-name>requestEncoding</param-name>
-            <param-value>windows-1251</param-value>
+            <param-value>UTF-8</param-value>
         </init-param>
     </filter>
     <filter-mapping>

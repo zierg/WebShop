@@ -11,7 +11,7 @@ package objects;
  * @author ASUS
  */
 public class User {
-   private int user_id;
+   private long userId;
    private String name = "";
    private String surname = "";
    private String middlename = "";
@@ -23,15 +23,15 @@ public class User {
     /**
      * @return the user_id
      */
-    public int getUser_id() {
-        return user_id;
+    public long getUserId() {
+        return userId;
     }
 
     /**
-     * @param user_id the user_id to set
+     * @param userId the user_id to set
      */
-    public void setUser_id(int user_id) {
-        this.user_id = user_id;
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
     /**
