@@ -20,6 +20,9 @@ import objects.ShoppingCart;
  */
 public final class HTMLHelper {
 
+    /**
+     * Класс для метода makeFormWithFields. Хранит информацию о текстовых полях.
+     */
     public static class FormTextField implements Comparable<FormTextField> {
 
         private final int order;
@@ -108,10 +111,21 @@ public final class HTMLHelper {
     private HTMLHelper() {
     }
 
+    /**
+     * Подготавливает мультистрочную строку к выводу на HTML странице
+     * (заменяет абзацы на тег <br>)
+     * @param source исходная строка
+     * @return 
+     */
     public static String getMultilineStringForHTML(String source) {
         return source.replace("\n", "<br />");
     }
 
+    /**
+     * Подключает CSS
+     * @param root корень веб-приложения
+     * @return 
+     */
     public static String includeCSS(String root) {
         return "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + root + CSS + "\" />";
     }
@@ -131,6 +145,13 @@ public final class HTMLHelper {
         }
     }
 
+    /**
+     * Код для создания гиперссылок на авторов книги
+     * @param book книга
+     * @param root корень веб-приложения
+     * @param linkClass css-класс ссылки
+     * @return 
+     */
     public static String getBookAuthorsLinks(Book book, String root, String linkClass) {
         StringBuilder b = new StringBuilder();
         int i = 1;
@@ -149,11 +170,24 @@ public final class HTMLHelper {
         return b.toString();
     }
 
+    /**
+     * Код для создания кнопки корзины.
+     * Если книга куплена, создаёт код ссылки на скачивание.
+     * Если книга не куплена и не в корзине, создаёт код добавления в корзину.
+     * Если книга не куплена и в корзине, создаёт код удаления из корзины.
+     * После добавления и удаления происходит перенаправление на страницу,
+     * на которой была нажата кнопка (передаётся в параметре fromURL)
+     * @param book книга
+     * @param fromURL ссылка, куда перенаправлять после добавления/удаления
+     * @param request HttpServletRequest (берётся request с jsp-страницы)
+     * @param purchased если книга куплена, то true, иначе false
+     * @return 
+     */
     public static String getInCartButtonCode(Book book, String fromURL, HttpServletRequest request, boolean purchased) {
         ShoppingCart cart = (ShoppingCart) request.getSession(false).getAttribute("shopping_cart");
         String root = request.getContextPath();
         if (purchased) {
-            return "<a href=\"" + root + book.getLink() + "\">Скачать</a>";
+            return "<a href=\"" + root + "/download/" + book.getLink() + "\">Скачать</a>";
         } else if (cart.getBookIds().contains(book.getBookId())) {
             return "<form name=\"inCart" + book.getBookId() + "\" action = \""
                     + root + "/removeFromCart\" method=\"POST\">"
@@ -169,6 +203,19 @@ public final class HTMLHelper {
         }
     }
 
+    /**
+     * Код для создания формы вида:
+     * текст1: поле1
+     * ...
+     * текстN: полеN
+     * кнопка submit
+     * @param fields поля (будут идти по позрастанию значения order)
+     * @param formName имя формы
+     * @param action action формы
+     * @param buttonText текст кнопки
+     * @param formMethod метод формы (GET или POST)
+     * @return 
+     */
     public static String makeFormWithFields(FormTextField[] fields, String formName, String action, String buttonText, String formMethod) {
         StringBuilder b = new StringBuilder();
         b.append("<form name=\"").append(formName).
@@ -192,11 +239,25 @@ public final class HTMLHelper {
     }
 
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
-
+    /**
+     * Код для получения года из даты
+     * @param date
+     * @return 
+     */
     public static String makeYear(Date date) {
         return dateFormat.format(date);
     }
 
+    /**
+     * Код для преобразования текста в формат, который можно положить в GET-запрос.
+     * Например, исходный текст: http://localhost:8080/WebShop/books?first=1&search_text=%D0%BF%D1%83%D1%88
+     * Из него получится: http%3A%2F%2Flocalhost%3A8080%2FWebShop%2Fbooks%3Ffirst%3D1%26search_text%3D%25D0%25BF%25D1%2583%25D1%2588
+     * Метод можно использвать, например, когда нужно составить ссылку вида:
+     * .....page.jsp?parameter1=value1&from=url
+     * подставляем вместо URL результат метода, в итоге вся ссылка корректно передастся
+     * @param path
+     * @return 
+     */
     public static String getURLAsGetParameer(String path) {
         try {
             return java.net.URLEncoder.encode(path, "UTF-8");
@@ -205,6 +266,15 @@ public final class HTMLHelper {
         }
     }
 
+    /**
+     * Код для таблицы книг
+     * @param books Список книг
+     * @param purchased Список ИДшников купленных книг
+     * @param request HttpServletRequest (берётся request с jsp-страницы)
+     * @param fromURL ссылка для создания кнопки корзины. Зачем нужна см. 
+     * в методе getInCartButtonCode
+     * @return 
+     */
     public static String makeBookTable(List<Book> books, List<Long> purchased, HttpServletRequest request, String fromURL) {
         String root = request.getContextPath();
         StringBuilder b = new StringBuilder()

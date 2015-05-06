@@ -17,6 +17,10 @@
             30
         </session-timeout>
     </session-config>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/unavailableLink.jsp</location>
+    </error-page>
     <resource-ref>
         <res-ref-name>jdbc/ShopDataSource</res-ref-name>
         <res-type>javax.sql.DataSource</res-type>

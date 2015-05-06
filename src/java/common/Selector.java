@@ -26,7 +26,7 @@ import objects.BookParam;
 import objects.ShoppingCart;
 
 /**
- *
+ * Выполняет операции в БД, связанные с контентом магазина.
  * @author Иван
  */
 public class Selector {
@@ -153,7 +153,16 @@ public class Selector {
 
     private final UserSelector userSelector;
     
-    public Selector() {
+    private static Selector instance;
+    
+    public static Selector getInstance() {
+        if (instance == null) {
+            instance = new Selector();
+        }
+        return instance;
+    }
+    
+    private Selector() {
         Locale.setDefault(Locale.ENGLISH);
         try {
             InitialContext initContext;
@@ -269,6 +278,13 @@ public class Selector {
         return books;
     }
 
+    /**
+     * Получить диапазон книг одного автора из отсортированного списка
+     * @param first номер первой книги
+     * @param last номер последней книги
+     * @param authorId ИД автора
+     * @return 
+     */
     public List<Book> getBooksByAuthorId(long first, long last, long authorId) {
         List<Book> books = new ArrayList<>();
         try (Connection con = getConnection()) {
@@ -291,6 +307,13 @@ public class Selector {
         return books;
     }
 
+    /**
+     * Получить диапазон книг одной категории из отсортированного списка
+     * @param first номер первой книги
+     * @param last номер последней книги
+     * @param categoryId ИД категории
+     * @return 
+     */
     public List<Book> getBooksByCategoryId(long first, long last, long categoryId) {
         List<Book> books = new ArrayList<>();
         try (Connection con = getConnection()) {
@@ -316,6 +339,11 @@ public class Selector {
         return books;
     }
 
+    /**
+     * Получить книгу по её ИД (все столбцы из таблицы).
+     * @param bookId ИД книги
+     * @return 
+     */
     public Book getBook(long bookId) {
         Book book = null;
         try (Connection con = getConnection()) {
@@ -333,6 +361,11 @@ public class Selector {
         return book;
     }
 
+    /**
+     * Получить категорию по её ИД (все столбцы из таблицы).
+     * @param categoryId ИД категории
+     * @return 
+     */
     public Category getCategory(long categoryId) {
         Category category = new Category();
         try (Connection con = getConnection()) {
@@ -349,6 +382,11 @@ public class Selector {
         return category;
     }
 
+    /**
+     * Получить автора по его ИД (все столбцы таблицы).
+     * @param authorId ИД автора
+     * @return 
+     */
     public Author getAuthor(long authorId) {
         Author author = null;
         try (Connection con = getConnection()) {
@@ -377,20 +415,43 @@ public class Selector {
      * должен быть выполнен, т.к. данные считываются из таблицы search_results)
      *
      * @param searchText поисковой запрос
-     * @return
+     * @param searchParameters параметры поиска (например "[in_description]").
+     * Поскольку с поиском в описаниях и без него результаты поиска отличаются,
+     * то сохранять нужно под разными ключами. Параметры поиска приписываются 
+     * в начало поискового запроса. Например, если был запрос "Капитанская,дочка"
+     * и стоял флаг "искать в описаниях", то в БД запишется следующее значение:
+     * "[in_description]капитанская дочка".
+     * @return количество книг
      */
     public long getSearchBooksCount(String searchText, String searchParameters) {
         return getBooksCount(BOOK_SEARCH_SELECT, searchParameters + searchText);
     }
 
+    /**
+     * Количество книг автора
+     * @param authorId ИД автора
+     * @return 
+     */
     public long getAuthorsBooksCount(long authorId) {
         return getBooksCount(SELECT_BOOKS_BY_AUTHOR, Long.toString(authorId));
     }
 
+    /**
+     * Количество книг категории
+     * @param categoryId ИД категории
+     * @return 
+     */
     public long getCategoryBooksCount(long categoryId) {
         return getBooksCount(SELECT_BOOKS_BY_CATEGORY, Long.toString(categoryId));
     }
 
+    /**
+     * Количество книг (хотя в принципе подходит для любых записей, тюкю
+     * в query может быть всё, что угодно), возвращаемых в результате запроса.
+     * @param query запрос
+     * @param parameters значения параметров запроса (должны идти в нужном порядке)
+     * @return 
+     */
     public long getBooksCount(String query, String... parameters) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement("select count(0) total_amount from (" + query + ")");
@@ -406,6 +467,14 @@ public class Selector {
         }
     }
 
+    /**
+     * Создаёт объект категории, заполненный только необходимыми для отображения
+     * в гиперссылке данными (название и ИД)
+     * @param rs результат запроса, в котором должны быть столбцы cat_name
+     * и category_id.
+     * @return
+     * @throws SQLException 
+     */
     private Category makeCategoryForBook(ResultSet rs) throws SQLException {
         Category category = new Category();
         category.setCategoryId(rs.getLong("category_id"));
@@ -413,6 +482,16 @@ public class Selector {
         return category;
     }
 
+    /**
+     * Создаёт объект Book
+     * @param rs результат запроса
+     * @param category категория
+     * @param allInfo если true, то загружаются все поля таблицы,
+     * иначе только те, которые необходимы для отображения книги в списке
+     * (ИД, категория, цена, название, ссылка)
+     * @return
+     * @throws SQLException 
+     */
     private Book makeBook(ResultSet rs, Category category, boolean allInfo) throws SQLException {
         Book book = new Book();
         book.setBookId(rs.getLong("book_id"));
@@ -429,6 +508,15 @@ public class Selector {
         return book;
     }
 
+    /**
+     * Создаёт объект Author
+     * @param rs результат запроса
+     * @param allInfo если true, то загружаются все поля таблицы,
+     * иначе только те, которые необходимы для отображения автора в гиперссылке
+     * (ИД, ФИО)
+     * @return
+     * @throws SQLException 
+     */
     private Author makeAuthor(ResultSet rs, boolean allInfo) throws SQLException {
         Author author = new Author();
         author.setAuthorId(rs.getLong("author_id"));
@@ -529,6 +617,11 @@ public class Selector {
         return ret;
     }
     
+    /**
+     * Получить все книги, находящиеся в корзине
+     * @param cart корзина
+     * @return 
+     */
     public List<Book> getBooksFromCart(ShoppingCart cart) {
         List<Book> books = new ArrayList<>();
         List<Long> bookIds = cart.getBookIds();
@@ -541,7 +634,6 @@ public class Selector {
         }
         b.replace(b.length()-1, b.length(), ")");
         String query = b.toString();
-        System.out.println("query = " + query);
         
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement(
@@ -564,6 +656,11 @@ public class Selector {
         }
     }
     
+    /**
+     * Получить все книги, хранящиеся в истории юзера (т.е. купленные).
+     * @param userId ИД юзера
+     * @return 
+     */
     public List<Book> getBooksFromHistory(long userId) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement(BOOK_SELECT_FOR_LIST + " and book_id in"

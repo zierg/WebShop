@@ -17,7 +17,8 @@ import objects.ShoppingCart;
 import objects.User;
 
 /**
- *
+ * Класс для работы с данными в БД, связанными с юзером. Конструктор закрытый,
+ * получить экземпляр можно из класса Selector
  * @author Иван
  */
 public class UserSelector {
@@ -32,6 +33,11 @@ public class UserSelector {
         return dataSource.getConnection();
     }
 
+    /**
+     * Проверка, существует ли юзер с таким логином
+     * @param username логин
+     * @return 
+     */
     public boolean doesUserExist(String username) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement("select count(0) user_exists from users where login = ?");
@@ -44,6 +50,10 @@ public class UserSelector {
         }
     }
 
+    /**
+     * Зарегистрировать юзера (в БД добавляются только логин, пароль и is_admin)
+     * @param user 
+     */
     public void registerUser(User user) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement("insert into users(login, password, is_admin) values(?,?,?)");
@@ -56,6 +66,11 @@ public class UserSelector {
         }
     }
 
+    /**
+     * Получить все данные юзера с известным логином
+     * @param login логин юзера
+     * @return 
+     */
     public User getUserByLogin(String login) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement("select * from users where login = ?");
@@ -77,6 +92,10 @@ public class UserSelector {
         }
     }
 
+    /**
+     * Сохранить данные пользователя (ФИО и е-мейл). У юзера должен быть заполнен ИД.
+     * @param user 
+     */
     public void saveUserData(User user) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement("update users set name = ?, surname = ?, middlename = ?, mail = ? where user_id = ?");
@@ -91,6 +110,10 @@ public class UserSelector {
         }
     }
 
+    /**
+     * Сохранить логин и пароль пользователя. У юзера должен быть заполнен ИД.
+     * @param user 
+     */
     public void saveLoginData(User user) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement("update users set password = ? where user_id = ?");
@@ -102,6 +125,12 @@ public class UserSelector {
         }
     }
 
+    /**
+     * Добавить книгу в корзину (только в таблицу shopping_cart! объект в сессии
+     * меняется сервлетом).
+     * @param userId ИД юзера
+     * @param bookId  ИД книги
+     */
     public void addToCart(long userId, long bookId) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement(
@@ -120,6 +149,11 @@ public class UserSelector {
         }
     }
 
+    /**
+     * Удалить книгу из корзины
+     * @param userId
+     * @param bookId 
+     */
     public void removeFromCart(long userId, long bookId) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement(
@@ -132,6 +166,10 @@ public class UserSelector {
         }
     }
 
+    /**
+     * Очистить корзину
+     * @param userId 
+     */
     public void clearCart(long userId) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement(
@@ -143,6 +181,11 @@ public class UserSelector {
         }
     }
     
+    /**
+     * Получить корзину юзера
+     * @param userId
+     * @return 
+     */
     public ShoppingCart getUsersCart(long userId) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement(
@@ -159,6 +202,16 @@ public class UserSelector {
         }
     }
     
+    /**
+     * Получить список ИДшников купленных книг. Проверяются только книги из списка
+     * booksToCheck, т.е. книги, купленные пользователем, но отсутствующие в booksToCheck,
+     * не попадут в результат метода. Метод используется для создания кнопок корзины
+     * на страницах со списком книг. На одной странице только определённый диапазон книг,
+     * его и нужно передать в booksToCheck.
+     * @param booksToCheck
+     * @param userId
+     * @return 
+     */
     public List<Long> getPurchasedBookIds(List<Book> booksToCheck, long userId) {
         StringBuilder b = new StringBuilder("select book_id from history where user_id = ? and book_id in (");
         for (int i = 0; i < booksToCheck.size(); i++) {
@@ -186,6 +239,12 @@ public class UserSelector {
         }
     }
     
+    /**
+     * Проверить, купил ли юзер книгу
+     * @param userId
+     * @param bookId
+     * @return 
+     */
     public boolean checkBookPurchasing(long userId, long bookId) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement(
@@ -200,6 +259,11 @@ public class UserSelector {
         }
     }
     
+    /**
+     * Занести данные о покупке книги
+     * @param userId
+     * @param cart 
+     */
     public void purchase(long userId, ShoppingCart cart) {
         try (Connection con = getConnection()) {
             PreparedStatement ps = con.prepareStatement(
@@ -210,6 +274,28 @@ public class UserSelector {
                 + " and sc.user_id = ?");
             ps.setLong(1, userId);
             ps.execute();
+        } catch (SQLException ex) {
+            throw new DaoException(ex);
+        }
+    }
+    
+    /**
+     * Проверить, может ли юзер пройти по ссылке для загрузки книги.
+     * @param userId
+     * @param link
+     * @return true, если ссылка есть у книги в таблице books и юзер купил эту книгу
+     */
+    public boolean isLinkAccessableForUser(long userId, String link) {
+        try (Connection con = getConnection()) {
+            PreparedStatement ps = con.prepareStatement(
+                    "select count(0) can_follow_link from books b, history h"
+                + " where h.user_id = ? and b.book_id = h.book_id and "
+                + " b.link = ?");
+            ps.setLong(1, userId);
+            ps.setString(2, link);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getBoolean("can_follow_link");
         } catch (SQLException ex) {
             throw new DaoException(ex);
         }

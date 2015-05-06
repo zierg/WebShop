@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import objects.Book;
 import static common.Constants.*;
 import common.UserSelector;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import objects.Author;
 import objects.Category;
@@ -32,7 +34,7 @@ import objects.User;
     "/cart", "/purchase", "/clearCart", "/history"})
 public class ShopServlet extends HttpServlet {
 
-    private final Selector selector = new Selector();
+    private final Selector selector = Selector.getInstance();
     private final UserSelector userSelector = selector.getUserSelector();
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -100,7 +102,6 @@ public class ShopServlet extends HttpServlet {
             }
             default: {
                 redirect("/login", request, response);
-                break;
             }
         }
     }
@@ -166,23 +167,54 @@ public class ShopServlet extends HttpServlet {
         request.getRequestDispatcher(path).forward(request, response);
     }
 
+    /**
+     * Добавить текст ошибки в реквест. Отобразится, если после вызова метода
+     * сделать форвард на страницу, в которую включён хэдер choose_header.jsp.
+     * @param request
+     * @param errorText 
+     */
     private void setErrorText(HttpServletRequest request, String errorText) {
         request.setAttribute("error_text", errorText);
     }
 
+    /**
+     * Добавить текст сообщения в реквест. Отобразится, если после вызова метода
+     * сделать форвард на страницу, в которую включён хэдер choose_header.jsp.
+     * @param request
+     * @param message 
+     */
     private void setMessage(HttpServletRequest request, String message) {
         request.setAttribute("message_text", message);
 
     }
 
+    /**
+     * Добавить текст сообщения в сессию. Отобразится, если после вызова метода
+     * сделать редирект на страницу, в которую включён хэдер choose_header.jsp.
+     * После первого отображения сообщение удаляется из сессии.
+     * @param request
+     * @param redirectedMessage 
+     */
     private void setRedirectedMessage(HttpServletRequest request, String redirectedMessage) {
         request.getSession().setAttribute("redirected_message", redirectedMessage);
     }
 
+    /**
+     * Добавить текст ошибки в сессию. Отобразится, если после вызова метода
+     * сделать редирект на страницу, в которую включён хэдер choose_header.jsp.
+     * После первого отображения ошибка удаляется из сессии.
+     * @param request
+     * @param errorText 
+     */
     private void setRedirectedError(HttpServletRequest request, String errorText) {
         request.getSession().setAttribute("redirected_error", errorText);
     }
 
+    /**
+     * Подготавливает строку к поиску. Меняет всё, кроме букв и цифр, на пробелы
+     * @param searchText
+     * @return 
+     */
     private String prepareForSearch(String searchText) {
         StringBuilder sb = new StringBuilder();
         for (char ch : searchText.toCharArray()) {
@@ -328,6 +360,15 @@ public class ShopServlet extends HttpServlet {
         response.sendRedirect(request.getServletContext().getContextPath() + "/books");
     }
 
+    /**
+     * Вход юзера. Проверяет, правильно ли всё введено, и добавляет к корзине юзера,
+     * хранящейся в БД, содержимое корзины, которую юзер заполнял до входа.
+     * Т.е. можно без входа добавлять книги в корзину, затем войти и книги останутся.
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException 
+     */
     private void login(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String username = request.getParameter("username");
@@ -371,6 +412,13 @@ public class ShopServlet extends HttpServlet {
         forward("/login.jsp", request, response);
     }
 
+    /**
+     * Сохраняет пользовательские данные (ФИО и е-мейл)
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException 
+     */
     private void saveUserData(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         User user = (User) request.getSession(false).getAttribute("user");
@@ -391,6 +439,13 @@ public class ShopServlet extends HttpServlet {
         redirect("/profile", request, response);
     }
 
+    /**
+     * Сохраняет пароль юзера. Проверяет, были ли правильно введены старый и новый пароли.
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException 
+     */
     private void saveLoginData(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         User user = (User) request.getSession(false).getAttribute("user");
@@ -439,6 +494,13 @@ public class ShopServlet extends HttpServlet {
         response.sendRedirect(from);
     }
     
+    /**
+     * Проверяет, существует ли корзина в сессии. Если нет, то создаёт новую.
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException 
+     */
     private void checkCartExisting(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         ShoppingCart cart = (ShoppingCart) request.getSession(true).getAttribute("shopping_cart");
